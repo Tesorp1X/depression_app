@@ -85,4 +85,13 @@ public class NoteDataSet implements Serializable {
     public long getUser_id() {
         return user_id;
     }
+
+    @Override
+    public String toString() {
+        return "Expense Note [id = " + id
+                + "value = " + value
+                + "date = " + date.toString()
+                + "description = " + description
+                + "user_id = " + user_id;
+    }
 }

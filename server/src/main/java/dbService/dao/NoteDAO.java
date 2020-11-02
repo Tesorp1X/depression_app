@@ -31,10 +31,23 @@ public class NoteDAO {
 
     }
 
-    public void deleteNoteById(long id) {
-    /*TODO: Find a new way, not deprecated*/
+    /*public void deleteNoteById(long id) {
+    //TODO: Find a new way, not deprecated
         Query q = session.createQuery("delete FROM NoteDataSet where id = " + id);
         q.executeUpdate();
-        Map<Integer, Integer>
+
+    }*/
+
+    public boolean deleteNoteById(long id) {
+
+        NoteDataSet note = session.load(NoteDataSet.class, id);
+        if (note != null) {
+            session.delete(note);
+            return true;
+        }
+
+        return false;
     }
+
+
 }

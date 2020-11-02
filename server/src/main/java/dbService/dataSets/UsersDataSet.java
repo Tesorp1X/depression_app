@@ -17,7 +17,7 @@ public class UsersDataSet implements Serializable {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
 
-    @Column(name = "username", unique = true, updatable = false, nullable = false)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -41,7 +41,7 @@ public class UsersDataSet implements Serializable {
 
     }
 
-    protected UsersDataSet(String username, String password, String telegram_key) {
+    public UsersDataSet(String username, String password, String telegram_key) {
 
         this.username = username;
 
@@ -50,12 +50,17 @@ public class UsersDataSet implements Serializable {
         this.telegram_key = telegram_key;
     }
 
-    protected void setUsername(String username) {
+    public void setUsername(String username) {
 
         this.username = username;
     }
 
-    protected void setPassword(String password) {
+    public void setTelegram_key(String telegram_key) {
+
+        this.telegram_key = telegram_key;
+    }
+
+    public void setPassword(String password) {
 
         this.password = password;
     }
@@ -77,4 +82,12 @@ public class UsersDataSet implements Serializable {
         return telegram_key;
     }
 
+
+
+    @Override
+    public String toString() {
+        return "User [id = " + id
+                + "username = " + username
+                + "telegram = " + telegram_key + "]";
+    }
 }
