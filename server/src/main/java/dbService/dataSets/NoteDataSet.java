@@ -31,7 +31,6 @@ public class NoteDataSet implements Serializable {
     @Column(name = "user_id", nullable = false)
     private long user_id;
 
-    //TODO: getters and constructs
 
     protected NoteDataSet() { }
 

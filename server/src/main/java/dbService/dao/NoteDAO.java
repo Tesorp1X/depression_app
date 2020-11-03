@@ -24,6 +24,7 @@ public class NoteDAO {
     }
 
     public long addNewNote(String name, int value, String description, java.util.Date date, long user_id) {
+
         return (Long) session.save(new NoteDataSet(name, value, date, description, user_id));
     }
 

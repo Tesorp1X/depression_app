@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "users")
-public class UsersDataSet implements Serializable {
+public class UserDataSet implements Serializable {
 
     private static final long serialVersionUID = -8706689714326132798L;
 
@@ -17,7 +17,7 @@ public class UsersDataSet implements Serializable {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
 
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(name = "username", unique = true, nullable = false, updatable = false)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -28,10 +28,9 @@ public class UsersDataSet implements Serializable {
     @Column(name = "telegram")
     private String telegram_key;
 
-    //TODO: getters and constructs
-    protected UsersDataSet() { }
+    protected UserDataSet() { }
 
-    public UsersDataSet(String username, String password) {
+    public UserDataSet(String username, String password) {
 
         this.username = username;
 
@@ -41,7 +40,7 @@ public class UsersDataSet implements Serializable {
 
     }
 
-    public UsersDataSet(String username, String password, String telegram_key) {
+    public UserDataSet(String username, String password, String telegram_key) {
 
         this.username = username;
 
