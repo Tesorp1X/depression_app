@@ -153,7 +153,7 @@ public class AccountService {
      * @throws InvalidUsernameException - being thrown when username is invalid.
      * @return accountService.UserAccount object.
      */
-    public UserAccount geUserByTelegram (String telegram) throws NoSuchUserException, InvalidUsernameException {
+    public UserAccount getUserByTelegram (String telegram) throws NoSuchUserException, InvalidUsernameException {
 
         String username = conventTelegramIdIntoUsername(telegram);
 
