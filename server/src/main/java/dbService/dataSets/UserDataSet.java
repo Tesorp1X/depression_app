@@ -1,6 +1,5 @@
 package dbService.dataSets;
 
-import org.w3c.dom.UserDataHandler;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -10,7 +9,9 @@ import java.io.Serializable;
 @Table(name = "users")
 public class UserDataSet implements Serializable {
 
-    private static final long serialVersionUID = -8706689714326132798L;
+    private static final long serialVersionUID = -7729539235975598423L;
+
+
 
     @Id
     @Column(name = "id")

@@ -9,7 +9,8 @@ import java.util.Date;
 @Table(name = "expense_notes")
 public class NoteDataSet implements Serializable {
 
-    private static final long serialVersionUID = -8706689714326132798L;
+    private static final long serialVersionUID = -7725201511719059002L;
+
 
     @Id
     @Column(name = "id")

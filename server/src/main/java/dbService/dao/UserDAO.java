@@ -4,7 +4,6 @@ import dbService.dataSets.UserDataSet;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -49,6 +48,7 @@ public class UserDAO {
 
         //UserDataSet user = session.get(UserDataSet.class, id);
         UserDataSet user = this.getUserById(id);
+
         if (user != null) {
             session.delete(user);
             return true;
@@ -77,7 +77,6 @@ public class UserDAO {
     }
 
     public List<UserDataSet> getListOfUsers() {
-        /**/
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<UserDataSet> cq = cb.createQuery(UserDataSet.class);

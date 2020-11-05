@@ -1,17 +1,17 @@
 package dbService;
 
+import accountService.UserAccount;
 import configurator.Configurator;
 
 import dbService.dataSets.*;
 import dbService.dao.*;
 
-import org.eclipse.jetty.server.PushBuilder;
+
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class DBService {
@@ -57,7 +57,7 @@ public class DBService {
 
 
     //User manipulation
-    public long addUser(String username, String password) throws SQLException {
+    public long addUser(String username, String password) {
 
         try {
             Session session = sessionFactory.openSession();
@@ -70,15 +70,14 @@ public class DBService {
             return id;
 
         } catch (HibernateException e) {
-            //TODO: handle exception
-            e.printStackTrace();
-            throw new SQLException(e);
+
+            return -1;
         }
 
     }
 
 
-    public long addUser(String username, String password, String telegram) throws SQLException {
+    public long addUser(String username, String password, String telegram) {
 
         try {
             Session session = sessionFactory.openSession();
@@ -91,24 +90,22 @@ public class DBService {
             return id;
 
         } catch (HibernateException e) {
-            //TODO: handle exception
-            //TODO: MAKE NEW EXCEPTION CLASS FOR THOSE SITUATIONS.
-            e.printStackTrace();
-            throw new SQLException(e);
+
+            return -1;
         }
 
     }
 
 
-    public void deleteUserByUsername(String username) throws SQLException {
+    public void deleteUserByUsername(String username) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         UserDAO userDAO = new UserDAO(session);
         UserDataSet userToDelete = userDAO.getUserByName(username);
         if (!userDAO.deleteUserById(userToDelete.getId())) {
-            //TODO: MAKE NEW EXCEPTION CLASS FOR THOSE SITUATIONS.
-            throw new SQLException("Can't delete user with username : ." + username);
+
+            throw new NoSuchUserException(username);
         }
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
@@ -116,7 +113,7 @@ public class DBService {
     }
 
 
-    public void deleteUserByTelegram(String telegram) throws SQLException {
+    public void deleteUserByTelegram(String telegram) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
@@ -125,8 +122,8 @@ public class DBService {
         UserDataSet user_to_delete = userDAO.getUserByTelegram(telegram);
 
         if (!userDAO.deleteUserById(user_to_delete.getId())) {
-            //TODO: MAKE NEW EXCEPTION CLASS FOR THOSE SITUATIONS.
-            throw new SQLException("Can't delete user with telegram_id : ." + telegram);
+
+            throw new NoSuchUserException(telegram);
         }
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
@@ -164,6 +161,31 @@ public class DBService {
         return  result_list;
     }
 
+
+    public UserDataSet findUserByUsername(String username) throws NoSuchUserException {
+        Session session = sessionFactory.openSession();
+        UserDAO userDAO = new UserDAO(session);
+
+        UserDataSet dataSet = userDAO.getUserByName(username);
+        if (dataSet == null) {
+            dataSet = userDAO.getUserByTelegram(username);
+        }
+
+        session.close();
+
+        if (dataSet == null) {
+            throw new NoSuchUserException(username);
+        }
+        return dataSet;
+    }
+
+
+    public UserAccount getUserAccountByUsername(String username) throws NoSuchUserException {
+
+        UserDataSet dataSet = findUserByUsername(username);
+
+        return new UserAccount(dataSet.getId() ,dataSet.getUsername(), dataSet.getPassword(), dataSet.getTelegram_key());
+    }
     //Note manipulation
 
 
