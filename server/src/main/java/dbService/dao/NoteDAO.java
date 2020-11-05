@@ -11,6 +11,9 @@ import org.hibernate.Query;
 
 import java.util.Map;
 
+/**
+ * @author Tesorp1X
+ */
 public class NoteDAO {
 
     private final Session session;

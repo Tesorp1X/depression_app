@@ -14,6 +14,9 @@ import org.hibernate.service.ServiceRegistry;
 
 import java.util.List;
 
+/**
+ * @author Tesorp1X
+ */
 public class DBService {
 
     private static final String hibernate_show_sql = "true";

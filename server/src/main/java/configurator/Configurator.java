@@ -8,8 +8,8 @@ import java.util.Properties;
 /**
  * Use to parse <SQL name>.conf file.
  * File must contain those fields: CONNECT_URL, CONNECT_USER, CONNECT_PASSWORD.
-  */
-
+ * @author Tesorp1X
+ */
 public class Configurator {
 
     private String CONNECT_URL;

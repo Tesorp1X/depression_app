@@ -1,6 +1,8 @@
 package accountService;
 
-
+/**
+ * @author Tesorp1X
+ */
 public class UserAccount {
 
     private final long user_id;

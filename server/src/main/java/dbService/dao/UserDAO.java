@@ -10,6 +10,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
+
+/**
+ * @author Tesorp1X
+ */
 public class UserDAO {
 
     private final Session session;

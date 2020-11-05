@@ -3,8 +3,9 @@ package accountService;
 import dbService.DBService;
 import dbService.NoSuchUserException;
 
-
-
+/**
+ * @author Tesorp1X
+ */
 public class AccountService {
 
     private final DBService dbService;
@@ -68,27 +69,6 @@ public class AccountService {
             return -1;
         }
 
-    }
-
-    /**
-     * Use to login user via telegram.
-     * @param telegram - Telegram_ID should be unique and should contain only digits.
-     * @return user_id with given telegram_id or "-1" if there is no such user.
-     */
-    public long loginViaTelegram (String telegram) {
-
-        String username = conventTelegramIdIntoUsername(telegram);
-
-        try {
-
-            UserAccount user = dbService.getUserAccountByUsername(username);
-
-            return user.getUser_id();
-
-        } catch (NoSuchUserException e) {
-
-            return  -1;
-        }
     }
 
 
