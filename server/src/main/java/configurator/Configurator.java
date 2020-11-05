@@ -12,17 +12,17 @@ import java.util.Properties;
  */
 public class Configurator {
 
-    private String CONNECT_URL;
+    private final String CONNECT_URL;
 
-    private String CONNECT_USER;
+    private final String CONNECT_USER;
 
-    private String CONNECT_PASSWORD;
+    private final String CONNECT_PASSWORD;
 
 
     /** //TODO: JavaDoc.
      * @param pathname string which is path to that file.
      */
-    public Configurator(String pathname) {
+    public Configurator(String pathname) throws ConfiguratorException {
 
         Properties props = new Properties();
 
@@ -35,9 +35,13 @@ public class Configurator {
             CONNECT_USER = props.getProperty("CONNECT_USER");
 
             CONNECT_PASSWORD = props.getProperty("CONNECT_PASSWORD");
-        //TODO: Handle all exceptions from props.load() : IOException, IllegalArgumentException, NullPointerException.
-        } catch (IOException e) {
+
+
+        } catch (IOException | IllegalArgumentException | NullPointerException e) {
+
+            System.err.println("ERROR OCCURRED : " + e.getMessage());
             e.printStackTrace();
+            throw new ConfiguratorException(e);
         }
 
 

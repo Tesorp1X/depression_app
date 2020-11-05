@@ -3,6 +3,7 @@ package dbService;
 import accountService.UserAccount;
 import configurator.Configurator;
 
+import configurator.ConfiguratorException;
 import dbService.dataSets.*;
 import dbService.dao.*;
 
@@ -25,7 +26,7 @@ public class DBService {
 
     private final SessionFactory sessionFactory;
 
-    public DBService() {
+    public DBService() throws ConfiguratorException {
 
         Configuration configuration = getMySqlConfiguration();
         sessionFactory = createSessionFactory(configuration);
@@ -40,7 +41,7 @@ public class DBService {
         return configuration.buildSessionFactory(serviceRegistry);
     }
 
-    private Configuration getMySqlConfiguration() {
+    private Configuration getMySqlConfiguration() throws ConfiguratorException {
 
         Configuration configuration = new Configuration();
         configuration.addAnnotatedClass(UserDataSet.class);

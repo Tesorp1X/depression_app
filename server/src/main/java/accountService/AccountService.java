@@ -1,5 +1,6 @@
 package accountService;
 
+import configurator.ConfiguratorException;
 import dbService.DBService;
 import dbService.NoSuchUserException;
 
@@ -11,7 +12,7 @@ public class AccountService {
 
     private final DBService dbService;
 
-    public AccountService() {
+    public AccountService() throws ConfiguratorException {
         dbService = new DBService();
     }
 
