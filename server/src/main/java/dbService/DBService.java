@@ -15,6 +15,7 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.List;
 
 /**
+ * Utility class to handle data base manipulations.
  * @author Tesorp1X
  */
 public class DBService {
@@ -128,25 +129,26 @@ public class DBService {
 
             throw new NoSuchUserException(telegram);
         }
+
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
         session.close();
     }
 
 
-    public void updateUser(String username, String new_password, String new_telegram) {
+    public void updateUser(String username, String new_password, String new_telegram) throws NoSuchUserException {
+
+        UserDataSet user_to_update = findUserByUsername(username);
+        user_to_update.setPassword(new_password);
+        user_to_update.setTelegram_key(new_telegram);
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
         UserDAO userDAO = new UserDAO(session);
-        userDAO.updateUserById(
-                userDAO.getUserByName(username).getId(),
-                username,
-                new_password,
-                new_telegram);
+        userDAO.updateUser(user_to_update);
+
         //TODO: LOG INFO ABOUT UPDATE.
-        //TODO: HANDLE EXCEPTIONS.
         transaction.commit();
         session.close();
 

@@ -36,13 +36,9 @@ public class UserDAO {
         return (Long) session.save(new UserDataSet(username, password, telegram));
     }
 
-    public void updateUserById(long id, String username, String password, String telegram) {
 
-        UserDataSet user_to_update = this.getUserById(id);
-        user_to_update.setPassword(password);
-        user_to_update.setTelegram_key(telegram);
+    public void updateUser(UserDataSet user_to_update) {
 
-        //TODO: warp into try/catch
         session.update(user_to_update);
     }
 
