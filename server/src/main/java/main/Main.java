@@ -2,8 +2,11 @@ package main;
 
 import accountService.AccountService;
 import dbService.DBService;
+import servletsUser.ServletRegister;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 /**
  * @author Tesorp1X
@@ -20,7 +23,14 @@ public class Main {
         //Servlets
         /* !!! Put accountService into users servlets. !!!  */
 
+        //User servlets
+        ServletRegister sRegister = new ServletRegister(accountService);
+
+
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+
+        context.addServlet(new ServletHolder(sRegister), "/AddNewUser");
+
 
         //Server itself
         Server server = new Server(8080);
