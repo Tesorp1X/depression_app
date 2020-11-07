@@ -82,7 +82,7 @@ public class UserDAO {
 
         } catch (NoResultException e) {
 
-            throw new NoSuchUserException(e);
+            throw new NoSuchUserException(username);
         }
 
     }
@@ -95,7 +95,7 @@ public class UserDAO {
 
         } catch (NoResultException e) {
 
-            throw new NoSuchUserException(e);
+            throw new NoSuchUserException("telegramId_" + telegram);
         }
 
     }

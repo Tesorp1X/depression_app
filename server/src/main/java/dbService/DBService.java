@@ -84,7 +84,6 @@ public class DBService {
 
     }
 
-
     public long addUser(String username, String password, String telegram) {
 
         try {
@@ -104,7 +103,6 @@ public class DBService {
 
     }
 
-
     public void deleteUserByUsername(String username) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
@@ -115,11 +113,11 @@ public class DBService {
 
             throw new NoSuchUserException(username);
         }
+
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
         session.close();
     }
-
 
     public void deleteUserByTelegram(String telegram) throws NoSuchUserException {
 
@@ -138,7 +136,6 @@ public class DBService {
         transaction.commit();
         session.close();
     }
-
 
     public void updateUser(String username, String new_password, String new_telegram) throws NoSuchUserException {
 
@@ -194,6 +191,7 @@ public class DBService {
         if (dataSet == null) {
             throw new NoSuchUserException(username);
         }
+
         return dataSet;
     }
 
@@ -209,6 +207,7 @@ public class DBService {
         if (dataSet == null) {
             throw new NoSuchUserException(telegram);
         }
+
         return dataSet;
     }
 
@@ -226,6 +225,7 @@ public class DBService {
 
         return new UserAccount(dataSet.getId() ,dataSet.getUsername(), dataSet.getPassword(), dataSet.getTelegram());
     }
+
     //Note manipulation
 
 
