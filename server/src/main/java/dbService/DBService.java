@@ -1,8 +1,8 @@
 package dbService;
 
 import accountService.UserAccount;
-import configurator.Configurator;
 
+import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
 import dbService.dao.*;
@@ -54,6 +54,7 @@ public class DBService {
         configuration.setProperty("hibernate.connection.url", configurator.getUrl());
         configuration.setProperty("hibernate.connection.username", configurator.getUser());
         configuration.setProperty("hibernate.connection.password", configurator.getPassword());
+
         configuration.setProperty("hibernate.show_sql", hibernate_show_sql);
         configuration.setProperty("hibernate.hbm2ddl.auto", hibernate_hbm2ddl_auto);
 
@@ -61,7 +62,9 @@ public class DBService {
     }
 
 
-    //User manipulation
+    /*       User manipulation      */
+
+
     public long addUser(String username, String password) {
 
         try {
@@ -107,7 +110,7 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         UserDAO userDAO = new UserDAO(session);
-        UserDataSet userToDelete = userDAO.getUserByName(username);
+        UserDataSet userToDelete = userDAO.getUserByUsername(username);
         if (!userDAO.deleteUserById(userToDelete.getId())) {
 
             throw new NoSuchUserException(username);
@@ -141,7 +144,7 @@ public class DBService {
 
         UserDataSet user_to_update = findUserByUsername(username);
         user_to_update.setPassword(new_password);
-        user_to_update.setTelegram_key(new_telegram);
+        user_to_update.setTelegram(new_telegram);
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
@@ -155,7 +158,7 @@ public class DBService {
 
     }
 
-    public List<UserDataSet> getAllUsers() {
+    public List<UserDataSet> getListOfUsers() {
 
         Session session = sessionFactory.openSession();
 
@@ -167,15 +170,24 @@ public class DBService {
         return  result_list;
     }
 
+    public List<UserDataSet> getListOfUsers(int start_point, int max_result) {
+
+        Session session = sessionFactory.openSession();
+
+        UserDAO userDAO = new UserDAO(session);
+        List<UserDataSet> result_list = userDAO.getListOfUsers(start_point, max_result);
+
+        session.close();
+
+        return  result_list;
+    }
 
     public UserDataSet findUserByUsername(String username) throws NoSuchUserException {
+
         Session session = sessionFactory.openSession();
         UserDAO userDAO = new UserDAO(session);
 
-        UserDataSet dataSet = userDAO.getUserByName(username);
-        if (dataSet == null) {
-            dataSet = userDAO.getUserByTelegram(username);
-        }
+        UserDataSet dataSet = userDAO.getUserByUsername(username);
 
         session.close();
 
@@ -185,12 +197,34 @@ public class DBService {
         return dataSet;
     }
 
+    public UserDataSet findUserByTelegram(String telegram) throws NoSuchUserException {
+
+        Session session = sessionFactory.openSession();
+        UserDAO userDAO = new UserDAO(session);
+
+        UserDataSet dataSet = userDAO.getUserByTelegram(telegram);
+
+        session.close();
+
+        if (dataSet == null) {
+            throw new NoSuchUserException(telegram);
+        }
+        return dataSet;
+    }
+
 
     public UserAccount getUserAccountByUsername(String username) throws NoSuchUserException {
 
         UserDataSet dataSet = findUserByUsername(username);
 
-        return new UserAccount(dataSet.getId() ,dataSet.getUsername(), dataSet.getPassword(), dataSet.getTelegram_key());
+        return new UserAccount(dataSet.getId() ,dataSet.getUsername(), dataSet.getPassword(), dataSet.getTelegram());
+    }
+
+    public UserAccount getUserAccountByTelegram(String telegram) throws NoSuchUserException {
+
+        UserDataSet dataSet = findUserByTelegram(telegram);
+
+        return new UserAccount(dataSet.getId() ,dataSet.getUsername(), dataSet.getPassword(), dataSet.getTelegram());
     }
     //Note manipulation
 

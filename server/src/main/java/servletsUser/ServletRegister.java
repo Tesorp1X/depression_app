@@ -25,13 +25,14 @@ public class ServletRegister extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String telegramId = request.getParameter("id");
+        long id = -1;
         try {
-            accountService.registerNewUser(telegramId);
+           id = accountService.registerNewUser(telegramId);
         } catch (InvalidUsernameException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        response.getWriter().println(telegramId);
+        response.getWriter().println("User_id : " + id + " " + telegramId);
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
     }

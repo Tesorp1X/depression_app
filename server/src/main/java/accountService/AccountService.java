@@ -3,6 +3,10 @@ package accountService;
 import configurator.ConfiguratorException;
 import dbService.DBService;
 import dbService.NoSuchUserException;
+import dbService.dataSets.UserDataSet;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility class over dbService to handle user accounts manipulations.
@@ -62,7 +66,7 @@ public class AccountService {
      */
     private boolean verifyTelegramId (String telegram) {
 
-        return telegram.matches("\\d+");
+        return telegram != null && telegram.matches("\\d+");
     }
 
     /**
@@ -95,7 +99,7 @@ public class AccountService {
      * @return id of new user in DB or "-1" if username isn't unique.
      */
     public long registerNewUser (String username, String password) throws InvalidUsernameOrPasswordException {
-
+        //TODO: use verifyUsernamePassword for that
         if (username == null || password == null || !username.matches("[0-9a-zA-Z]+")) {
 
             throw new InvalidUsernameOrPasswordException(username + " " + password);
@@ -113,14 +117,14 @@ public class AccountService {
     public long registerNewUser (String telegram) throws InvalidUsernameException {
 
         String username = conventTelegramIdIntoUsername(telegram);
-        if (telegram == null || !telegram.matches("\\d+")) {
+        if (!verifyTelegramId(telegram)) {
 
             throw new InvalidUsernameException(username);
         }
 
         String password = "";
 
-        return dbService.addUser(username, password);
+        return dbService.addUser(username, password, telegram);
     }
 
     /**
@@ -131,7 +135,7 @@ public class AccountService {
      * @return accountService.UserAccount object.
      */
     public UserAccount getUserByUsername (String username) throws NoSuchUserException, InvalidUsernameException {
-
+        //TODO: use verifyUsernamePassword for that
         if (username == null || !username.matches("[0-9a-zA-Z]+")) {
 
             throw new InvalidUsernameException(username);
@@ -148,15 +152,57 @@ public class AccountService {
      * @return accountService.UserAccount object.
      */
     public UserAccount getUserByTelegram (String telegram) throws NoSuchUserException, InvalidUsernameException {
-
         String username = conventTelegramIdIntoUsername(telegram);
-
-        if (telegram == null || !telegram.matches("\\d+")) {
+        if (!verifyTelegramId(telegram)) {
 
             throw new InvalidUsernameException(username);
         }
 
-        return dbService.getUserAccountByUsername(username);
+        return  dbService.getUserAccountByTelegram(telegram);
+    }
+
+    /**
+     * Use it to get a list of all users.
+     * @return a list of UserAccount objects with toString method implemented.
+     */
+    public List<UserAccount> getListOfUsers() {
+
+        List<UserDataSet> dataSetList = dbService.getListOfUsers();
+        List<UserAccount> accountList = new LinkedList<>();
+
+        for (var o : dataSetList) {
+            accountList.add(new UserAccount(o.getId(), o.getUsername(), o.getPassword(), o.getTelegram()));
+        }
+
+        return accountList;
+    }
+
+    /**
+     * Use it to get a limited list of users.
+     * @param start_point int value (user id to start list assembly until length
+     *                                      of max_result or end of results in table is reached.
+     * @param max_result max amount of objects in list.
+     *
+     * @throws NegativeArraySizeException if max_result is negative.
+     * @throws IndexOutOfBoundsException if start_point is negative.
+     * @return a list of UserAccount objects with toString method implemented.
+     */
+    public List<UserAccount> getListOfUsers(int start_point, int max_result) {
+        if (max_result < 0) {
+            throw new NegativeArraySizeException(String.valueOf(max_result));
+        }
+        if (start_point < 0) {
+            throw new IndexOutOfBoundsException(String.valueOf(start_point));
+        }
+
+        List<UserDataSet> dataSetList = dbService.getListOfUsers(start_point, max_result);
+        List<UserAccount> accountList = new LinkedList<>();
+
+        for (var o : dataSetList) {
+            accountList.add(new UserAccount(o.getId(), o.getUsername(), o.getPassword(), o.getTelegram()));
+        }
+
+        return accountList;
     }
 
     /**
@@ -165,8 +211,9 @@ public class AccountService {
      * @throws NoSuchUserException being thrown when there is no such no user in DB with given username.
      * @throws InvalidUsernameException being thrown when username is invalid.
      */
-    public void deleteUserByUsername (String username) throws NoSuchUserException, InvalidUsernameException {
+    public void deleteUserByUsername(String username) throws NoSuchUserException, InvalidUsernameException {
 
+        //TODO: use verifyUsernamePassword for that
         if (username == null || !username.matches("[0-9a-zA-Z]+")) {
 
             throw new InvalidUsernameException(username);
@@ -181,11 +228,11 @@ public class AccountService {
      * @throws NoSuchUserException being thrown when there is no such no user in DB with given username.
      * @throws InvalidUsernameException being thrown when username is invalid.
      */
-    public void deleteUserByTelegram (String telegram) throws InvalidUsernameException, NoSuchUserException {
+    public void deleteUserByTelegram(String telegram) throws InvalidUsernameException, NoSuchUserException {
 
         String username = conventTelegramIdIntoUsername(telegram);
 
-        if (telegram == null || !telegram.matches("\\d+")) {
+        if (!verifyTelegramId(telegram)) {
 
             throw new InvalidUsernameException(username);
         }

@@ -15,7 +15,7 @@ public class UserDataSet implements Serializable {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(name = "username", unique = true, nullable = false, updatable = false)
@@ -24,10 +24,8 @@ public class UserDataSet implements Serializable {
     @Column(name = "password", nullable = false)
     private String password;
 
-
-
-    @Column(name = "telegram")
-    private String telegram_key;
+    @Column(name = "telegram", unique = true)
+    private String telegram;
 
     protected UserDataSet() { }
 
@@ -37,17 +35,17 @@ public class UserDataSet implements Serializable {
 
         this.password = password;
 
-        this.telegram_key = null;
+        this.telegram = null;
 
     }
 
-    public UserDataSet(String username, String password, String telegram_key) {
+    public UserDataSet(String username, String password, String telegram) {
 
         this.username = username;
 
         this.password = password;
 
-        this.telegram_key = telegram_key;
+        this.telegram = telegram;
     }
 
     public void setUsername(String username) {
@@ -55,9 +53,9 @@ public class UserDataSet implements Serializable {
         this.username = username;
     }
 
-    public void setTelegram_key(String telegram_key) {
+    public void setTelegram(String telegram_key) {
 
-        this.telegram_key = telegram_key;
+        this.telegram = telegram_key;
     }
 
     public void setPassword(String password) {
@@ -78,8 +76,8 @@ public class UserDataSet implements Serializable {
         return password;
     }
 
-    public String getTelegram_key() {
-        return telegram_key;
+    public String getTelegram() {
+        return telegram;
     }
 
 
@@ -88,6 +86,6 @@ public class UserDataSet implements Serializable {
     public String toString() {
         return "User [id = " + id
                 + "username = " + username
-                + "telegram = " + telegram_key + "]";
+                + "telegram = " + telegram + "]";
     }
 }
