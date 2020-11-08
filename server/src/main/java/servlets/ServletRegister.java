@@ -39,8 +39,7 @@ public class ServletRegister extends HttpServlet {
             try {
                 returnedValue = accountService.registerNewUser(username, pass);
             } catch (InvalidUsernameOrPasswordException e) {
-                response.getWriter().println("ERROR: cant't register new user! User with same username is already exist ");
-                e.printStackTrace();
+                response.getWriter().println("ERROR: can't register new user! Invalid username.");
             }
             
         } else {
@@ -48,15 +47,19 @@ public class ServletRegister extends HttpServlet {
             try {
                 returnedValue = accountService.registerNewUser(telegramId); //If we added new user to db, then value changed to if of user.
             } catch (InvalidUsernameException e) {
-                response.getWriter().println("ERROR: cant't register new user! User with same username is already exist ");
-                e.printStackTrace();
+                response.getWriter().println("ERROR: can't register new user! Invalid username.");
             }
         }
-        response.getWriter().print("UUID: ");
-        response.getWriter().println(telegramId);
-        response.getWriter().print("User id in db: ");
-        response.getWriter().println(returnedValue);
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
+
+        if (returnedValue == -1) {
+            response.getWriter().println("ERROR: can't register new user! User with such username is already exist.");
+        } else {
+            response.getWriter().print("UUID: ");
+            response.getWriter().println(telegramId);
+            response.getWriter().print("User id in db: ");
+            response.getWriter().println(returnedValue);
+            response.setContentType("text/html;charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
     }
 }

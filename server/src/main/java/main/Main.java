@@ -2,6 +2,7 @@ package main;
 
 import accountService.AccountService;
 import dbService.DBService;
+import servlets.ServletDeleteUser;
 import servlets.ServletGetUser;
 import servlets.ServletRegister;
 
@@ -27,12 +28,14 @@ public class Main {
         //User servlets
         ServletRegister sRegister = new ServletRegister(accountService);
         ServletGetUser sGetUser = new ServletGetUser(accountService);
+        ServletDeleteUser sDeleteUser = new ServletDeleteUser(accountService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
         context.addServlet(new ServletHolder(sRegister), "/AddNewUser");
         context.addServlet(new ServletHolder(sGetUser), "/GetUser");
+        context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
 
         //Server itself
         Server server = new Server(8080);
