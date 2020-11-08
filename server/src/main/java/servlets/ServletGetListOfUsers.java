@@ -10,6 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import accountService.AccountService;
 import accountService.UserAccount;
 
+
+/**
+ * @author KyMaKa
+ */
 public class ServletGetListOfUsers extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;

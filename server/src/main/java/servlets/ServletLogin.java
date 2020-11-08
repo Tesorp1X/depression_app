@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import accountService.AccountService;
 
+/**
+ * @author KyMaKa
+ */
 public class ServletLogin extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;

@@ -11,6 +11,9 @@ import accountService.InvalidTelegramIdException;
 import accountService.InvalidUsernameOrPasswordException;
 import dbService.NoSuchUserException;
 
+/**
+ * @author KyMaKa
+ */
 public class ServletUpdateUser extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
