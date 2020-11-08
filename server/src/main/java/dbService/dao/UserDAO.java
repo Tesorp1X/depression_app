@@ -1,12 +1,15 @@
 package dbService.dao;
 
+import dbService.NoSuchUserException;
 import dbService.dataSets.UserDataSet;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Root;
 import java.util.List;
 
@@ -46,7 +49,6 @@ public class UserDAO {
 
     public boolean deleteUserById(long id) {
 
-        //UserDataSet user = session.get(UserDataSet.class, id);
         UserDataSet user = this.getUserById(id);
 
         if (user != null) {
@@ -57,26 +59,48 @@ public class UserDAO {
         return false;
     }
 
-    public UserDataSet getUserByName(String username) {
+    private UserDataSet getEntity(String field_name, String field_value) {
 
-        //TODO: refactor using CriteriaBuilder
-        //CriteriaBuilder cb = session.getCriteriaBuilder();
-        return ((UserDataSet) session.createCriteria(UserDataSet.class)
-                .add(Restrictions
-                        .eq("username", username)));
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<UserDataSet> criteria = builder.createQuery(UserDataSet.class);
+
+        Root<UserDataSet> from = criteria.from(UserDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<UserDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+
+        return typedQuery.getSingleResult();
     }
 
-    public UserDataSet getUserByTelegram(String telegram) {
+    public UserDataSet getUserByUsername(String username) throws NoSuchUserException {
 
-        //TODO: refactor using CriteriaBuilder
-        //CriteriaBuilder cb = session.getCriteriaBuilder();
+        try {
 
-        return ((UserDataSet) session.createCriteria(UserDataSet.class)
-                .add(Restrictions
-                        .eq("telegram", telegram)));
+            return getEntity("username", username);
+
+        } catch (NoResultException e) {
+
+            throw new NoSuchUserException(username);
+        }
+
     }
 
-    public List<UserDataSet> getListOfUsers() {
+    public UserDataSet getUserByTelegram(String telegram) throws NoSuchUserException {
+
+        try {
+
+            return getEntity("telegram", telegram);
+
+        } catch (NoResultException e) {
+
+            throw new NoSuchUserException("telegramId_" + telegram);
+        }
+
+    }
+
+    private List<UserDataSet> getListOfUsers_(int start_point, int max_result) {
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<UserDataSet> cq = cb.createQuery(UserDataSet.class);
@@ -84,8 +108,21 @@ public class UserDAO {
         CriteriaQuery<UserDataSet> all = cq.select(rootEntry);
 
         TypedQuery<UserDataSet> allQuery = session.createQuery(all);
+        if (max_result != -1) {
+            allQuery.setFirstResult(start_point).setMaxResults(max_result);
+        }
 
         return allQuery.getResultList();
+    }
+
+    public List<UserDataSet> getListOfUsers() {
+
+        return getListOfUsers_(-1, -1);
+    }
+
+    public List<UserDataSet> getListOfUsers(int start_point, int max_result) {
+
+        return getListOfUsers_(start_point, max_result);
     }
 
 }

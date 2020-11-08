@@ -44,4 +44,12 @@ public class UserAccount {
     public String getTelegram() {
         return telegram;
     }
+
+    @Override
+    public String toString() {
+        return "UserAccount : [id = " + user_id
+                + " username = " + username
+                + " password = " + password
+                + " telegram = " + telegram + "]";
+    }
 }

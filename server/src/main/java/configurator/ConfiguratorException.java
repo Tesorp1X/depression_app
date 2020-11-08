@@ -1,6 +1,7 @@
 package configurator;
 
-public class ConfiguratorException extends Exception{
+public class ConfiguratorException extends Exception {
+
     public ConfiguratorException(Throwable cause) {
         super(cause);
     }

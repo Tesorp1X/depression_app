@@ -18,7 +18,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         //Services
-        DBService dbService = new DBService();
         AccountService accountService = new AccountService(new DBService());
         //AccountService accountService = new AccountService(dbService);
 
@@ -31,11 +30,13 @@ public class Main {
         ServletDeleteUser sDeleteUser = new ServletDeleteUser(accountService);
 
 
+
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
         context.addServlet(new ServletHolder(sRegister), "/AddNewUser");
         context.addServlet(new ServletHolder(sGetUser), "/GetUser");
         context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
+
 
         //Server itself
         Server server = new Server(8080);

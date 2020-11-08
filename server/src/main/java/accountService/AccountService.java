@@ -1,8 +1,12 @@
 package accountService;
 
-import configurator.ConfiguratorException;
+
 import dbService.DBService;
 import dbService.NoSuchUserException;
+import dbService.dataSets.UserDataSet;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility class over dbService to handle user accounts manipulations.
@@ -12,9 +16,6 @@ public class AccountService {
 
     private final DBService dbService;
 
-    public AccountService() throws ConfiguratorException {
-        dbService = new DBService();
-    }
 
     public AccountService(DBService dbService) {
         this.dbService = dbService;
@@ -26,50 +27,49 @@ public class AccountService {
 
     }
 
-    @SuppressWarnings("Do we need it?")
-    private boolean isUserExist(String username) {
-
-        if (username == null) return false;
-
-        try {
-
-            UserAccount user = dbService.getUserAccountByUsername(username);
-            return true;
-
-        } catch (NoSuchUserException e) {
-
-
-            return false;
-        }
-
-    }
 
     /**
      * Verifies if given username and password are valid.
      *
-     * Valid username should consist of ...
-     * Valid password should be ...
+     * @param username Valid username should consist of 0-9, a-z and A-Z.
+     * @param password password should consist of 0-9, a-z and A-Z.
      */
-    private boolean verifyUsernamePassword (String username, String password) {
+    private boolean verifyUsernamePassword(String username, String password) {
 
-        //TODO: Username and password verificator.
+        return username != null
+                && password != null
+                && username.matches("[0-9a-zA-Z]+")
+                && password.matches("[0-9a-zA-Z]+");
+    }
 
-        return false;
+    /**
+     * Verifies if given username are valid.
+     *
+     * @param username Valid username should consist of 0-9, a-z and A-Z.
+     *
+     */
+    private boolean verifyUsername(String username) {
+
+        return username != null && username.matches("[0-9a-zA-Z]+");
     }
 
     /**
      * Verifies if given telegram id is valid.
      */
-    private boolean verifyTelegramId (String telegram) {
+    private boolean verifyTelegramId(String telegram) {
 
-        return telegram.matches("\\d+");
+        return telegram != null && telegram.matches("\\d+");
     }
 
     /**
      * Use to login user via telegram.
      * @return user_id with given username and password or "-1" if there is no such user or wrong password.
      */
-    public long loginViaUsername (String username, String password) {
+    public long loginViaUsername(String username, String password) {
+
+        if (!verifyUsername(username)) {
+            return -1;
+        }
 
         try {
             UserAccount userAccount = dbService.getUserAccountByUsername(username);
@@ -94,9 +94,9 @@ public class AccountService {
      * @throws InvalidUsernameOrPasswordException if username or password parameter is empty or contains invalid characters.
      * @return id of new user in DB or "-1" if username isn't unique.
      */
-    public long registerNewUser (String username, String password) throws InvalidUsernameOrPasswordException {
+    public long registerNewUser(String username, String password) throws InvalidUsernameOrPasswordException {
 
-        if (username == null || password == null || !username.matches("[0-9a-zA-Z]+")) {
+        if (!verifyUsernamePassword(username, password)) {
 
             throw new InvalidUsernameOrPasswordException(username + " " + password);
         }
@@ -110,17 +110,17 @@ public class AccountService {
      * @throws InvalidUsernameException if telegram parameter is empty or contains not only digits from 0 to 9.
      * @return id of new user in DB or "-1" if username isn't unique.
      */
-    public long registerNewUser (String telegram) throws InvalidUsernameException {
+    public long registerNewUser(String telegram) throws InvalidUsernameException {
 
         String username = conventTelegramIdIntoUsername(telegram);
-        if (telegram == null || !telegram.matches("\\d+")) {
+        if (!verifyTelegramId(telegram)) {
 
             throw new InvalidUsernameException(username);
         }
 
         String password = "";
 
-        return dbService.addUser(username, password);
+        return dbService.addUser(username, password, telegram);
     }
 
     /**
@@ -130,9 +130,9 @@ public class AccountService {
      * @throws InvalidUsernameException being thrown when username is invalid.
      * @return accountService.UserAccount object.
      */
-    public UserAccount getUserByUsername (String username) throws NoSuchUserException, InvalidUsernameException {
+    public UserAccount getUserByUsername(String username) throws NoSuchUserException, InvalidUsernameException {
 
-        if (username == null || !username.matches("[0-9a-zA-Z]+")) {
+        if (!verifyUsername(username)) {
 
             throw new InvalidUsernameException(username);
         }
@@ -147,16 +147,59 @@ public class AccountService {
      * @throws InvalidUsernameException being thrown when username is invalid.
      * @return accountService.UserAccount object.
      */
-    public UserAccount getUserByTelegram (String telegram) throws NoSuchUserException, InvalidUsernameException {
+    public UserAccount getUserByTelegram(String telegram) throws NoSuchUserException, InvalidUsernameException {
 
         String username = conventTelegramIdIntoUsername(telegram);
-
-        if (telegram == null || !telegram.matches("\\d+")) {
+        if (!verifyTelegramId(telegram)) {
 
             throw new InvalidUsernameException(username);
         }
 
-        return dbService.getUserAccountByUsername(username);
+        return  dbService.getUserAccountByTelegram(telegram);
+    }
+
+    /**
+     * Use it to get a list of all users.
+     * @return a list of UserAccount objects with toString method implemented.
+     */
+    public List<UserAccount> getListOfUsers() {
+
+        List<UserDataSet> dataSetList = dbService.getListOfUsers();
+        List<UserAccount> accountList = new LinkedList<>();
+
+        for (var o : dataSetList) {
+            accountList.add(new UserAccount(o.getId(), o.getUsername(), o.getPassword(), o.getTelegram()));
+        }
+
+        return accountList;
+    }
+
+    /**
+     * Use it to get a limited list of users.
+     * @param start_point int value (user id to start list assembly until length
+     *                                      of max_result or end of results in table is reached.
+     * @param max_result max amount of objects in list.
+     * @throws NegativeArraySizeException if max_result is negative.
+     * @throws IndexOutOfBoundsException if start_point is negative.
+     * @return a list of UserAccount objects with toString method implemented.
+     */
+    public List<UserAccount> getListOfUsers(int start_point, int max_result) {
+
+        if (max_result < 0) {
+            throw new NegativeArraySizeException(String.valueOf(max_result));
+        }
+        if (start_point < 0) {
+            throw new IndexOutOfBoundsException(String.valueOf(start_point));
+        }
+
+        List<UserDataSet> dataSetList = dbService.getListOfUsers(start_point, max_result);
+        List<UserAccount> accountList = new LinkedList<>();
+
+        for (var o : dataSetList) {
+            accountList.add(new UserAccount(o.getId(), o.getUsername(), o.getPassword(), o.getTelegram()));
+        }
+
+        return accountList;
     }
 
     /**
@@ -165,9 +208,10 @@ public class AccountService {
      * @throws NoSuchUserException being thrown when there is no such no user in DB with given username.
      * @throws InvalidUsernameException being thrown when username is invalid.
      */
-    public void deleteUserByUsername (String username) throws NoSuchUserException, InvalidUsernameException {
+    public void deleteUserByUsername(String username) throws NoSuchUserException, InvalidUsernameException {
 
-        if (username == null || !username.matches("[0-9a-zA-Z]+")) {
+
+        if (!verifyUsername(username)) {
 
             throw new InvalidUsernameException(username);
         }
@@ -179,18 +223,16 @@ public class AccountService {
      * Use to delete user from DB via telegram_id.
      * @param telegram telegram_id should be valid and point to some user, otherwise exception being thrown.
      * @throws NoSuchUserException being thrown when there is no such no user in DB with given username.
-     * @throws InvalidUsernameException being thrown when username is invalid.
+     * @throws InvalidTelegramIdException if telegram_id is empty or consists not only from 0-9.
      */
-    public void deleteUserByTelegram (String telegram) throws InvalidUsernameException, NoSuchUserException {
+    public void deleteUserByTelegram(String telegram) throws NoSuchUserException, InvalidTelegramIdException {
 
-        String username = conventTelegramIdIntoUsername(telegram);
+        if (!verifyTelegramId(telegram)) {
 
-        if (telegram == null || !telegram.matches("\\d+")) {
-
-            throw new InvalidUsernameException(username);
+            throw new InvalidTelegramIdException(telegram);
         }
 
-        dbService.deleteUserByUsername(username);
+        dbService.deleteUserByTelegram(telegram);
     }
 
     /**
@@ -201,12 +243,18 @@ public class AccountService {
      *                                                  use version without telegram parameter then.
      * @throws NoSuchUserException being thrown when there is no such no user in DB with given username.
      * @throws InvalidUsernameOrPasswordException if username or password parameter is empty or contains invalid characters.
+     * @throws InvalidTelegramIdException if telegram_id is empty or consists not only from 0-9.
      */
     public void updateUser(String username, String new_password, String new_telegram)
-                                                throws NoSuchUserException, InvalidUsernameOrPasswordException {
+            throws NoSuchUserException, InvalidUsernameOrPasswordException, InvalidTelegramIdException {
 
-        if (new_password == null) {
-            throw new InvalidUsernameOrPasswordException("Empty password.");
+        if (!verifyUsernamePassword(username, new_password)) {
+
+            throw new InvalidUsernameOrPasswordException();
+
+        } else if (!verifyTelegramId(new_telegram)) {
+
+            throw new InvalidTelegramIdException(new_telegram);
         }
 
         dbService.updateUser(username, new_password, new_telegram);
