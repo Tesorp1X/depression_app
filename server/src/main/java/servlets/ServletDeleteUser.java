@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import accountService.AccountService;
+import accountService.InvalidTelegramIdException;
 import accountService.InvalidUsernameException;
 import dbService.NoSuchUserException;
 
@@ -36,7 +37,7 @@ public class ServletDeleteUser extends HttpServlet {
             } catch (NoSuchUserException | InvalidUsernameException e) {
 
                 if (e instanceof NoSuchUserException) {
-                    response.getWriter().println("ERROR: can't get user! There is no such user");
+                    response.getWriter().println("ERROR: can't get user! There is no such user.");
                 } else {
                     response.getWriter().println("ERROR: can't get user! Invalid username!");
                 }
@@ -47,15 +48,15 @@ public class ServletDeleteUser extends HttpServlet {
             try {
 
                 accountService.deleteUserByTelegram(telegramId);
-            } catch (NoSuchUserException | InvalidUsernameException e) {
+            } catch (NoSuchUserException | InvalidTelegramIdException e) {
 
                 if (e instanceof NoSuchUserException) {
-                    response.getWriter().println("ERROR: can't get user! There is no such user");
+                    response.getWriter().println("ERROR: can't get user! There is no such user.");
                 } else {
-                    response.getWriter().println("ERROR: can't get user! Invalid username!");
+                    response.getWriter().println("ERROR: can't get user! Invalid Telegram id!");
                 }
             }
-            response.getWriter().println("User with Telegram id: " + telegramId + " deleted"); 
+            response.getWriter().println("User with Telegram id: " + telegramId + " deleted."); 
         }
 
     }

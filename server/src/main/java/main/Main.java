@@ -5,6 +5,7 @@ import dbService.DBService;
 import servlets.ServletDeleteUser;
 import servlets.ServletGetUser;
 import servlets.ServletRegister;
+import servlets.ServletUpdateUser;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -28,6 +29,7 @@ public class Main {
         ServletRegister sRegister = new ServletRegister(accountService);
         ServletGetUser sGetUser = new ServletGetUser(accountService);
         ServletDeleteUser sDeleteUser = new ServletDeleteUser(accountService);
+        ServletUpdateUser sUpdateUser = new ServletUpdateUser(accountService);
 
 
 
@@ -36,6 +38,7 @@ public class Main {
         context.addServlet(new ServletHolder(sRegister), "/AddNewUser");
         context.addServlet(new ServletHolder(sGetUser), "/GetUser");
         context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
+        context.addServlet(new ServletHolder(sUpdateUser), "/UpdateUser");
 
 
         //Server itself
