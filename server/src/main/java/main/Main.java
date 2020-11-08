@@ -3,6 +3,7 @@ package main;
 import accountService.AccountService;
 import dbService.DBService;
 import servlets.ServletDeleteUser;
+import servlets.ServletGetListOfUsers;
 import servlets.ServletGetUser;
 import servlets.ServletRegister;
 import servlets.ServletUpdateUser;
@@ -30,6 +31,7 @@ public class Main {
         ServletGetUser sGetUser = new ServletGetUser(accountService);
         ServletDeleteUser sDeleteUser = new ServletDeleteUser(accountService);
         ServletUpdateUser sUpdateUser = new ServletUpdateUser(accountService);
+        ServletGetListOfUsers sGetListOfUsers = new ServletGetListOfUsers(accountService);
 
 
 
@@ -39,6 +41,7 @@ public class Main {
         context.addServlet(new ServletHolder(sGetUser), "/GetUser");
         context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
         context.addServlet(new ServletHolder(sUpdateUser), "/UpdateUser");
+        context.addServlet(new ServletHolder(sGetListOfUsers), "/GetListOfUsers");
 
 
         //Server itself
