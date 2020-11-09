@@ -27,6 +27,8 @@ public class ServletGetUser extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        response.setContentType("text/plain;charset=utf-8");
+
         String telegramId = request.getParameter("t_id");
         String username;
         UserAccount account = null;
@@ -36,10 +38,13 @@ public class ServletGetUser extends HttpServlet {
 
             try {
                 account = accountService.getUserByUsername(username);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (NoSuchUserException | InvalidUsernameException e) {
                 if (e instanceof NoSuchUserException) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().println("ERROR: can't get user! There is no such user");
                 } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().println("ERROR: can't get user! Invalid username!");
                 }
             }
@@ -48,18 +53,21 @@ public class ServletGetUser extends HttpServlet {
 
             try {
                 account = accountService.getUserByTelegram(telegramId);
+                response.setStatus(HttpServletResponse.SC_OK);
             } catch (NoSuchUserException | InvalidUsernameException e) {
                 if (e instanceof NoSuchUserException) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().println("ERROR: can't get user! There is no such user");
                     } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                         response.getWriter().println("ERROR: can't get user! Invalid username!");
                 }
             }
         }
         
-        response.getWriter().print(account.toString());
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
+        if (response.getStatus() == HttpServletResponse.SC_OK) {
+            response.getWriter().print(account.toString());
+        }
     }
     
 }
