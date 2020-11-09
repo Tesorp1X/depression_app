@@ -23,7 +23,7 @@ public class ServletGetListOfUsers extends HttpServlet {
         this.accountService = accountService;
     }
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         List<UserAccount> users = null;
 
@@ -33,7 +33,11 @@ public class ServletGetListOfUsers extends HttpServlet {
             users = accountService.getListOfUsers();
         } else {
             String max_result = request.getParameter("max_result");
-            users = accountService.getListOfUsers(Integer.parseInt(start_point), Integer.parseInt(max_result));
+            try {
+                users = accountService.getListOfUsers(Integer.parseInt(start_point), Integer.parseInt(max_result));
+            } catch (IndexOutOfBoundsException | NegativeArraySizeException e) {
+                response.getWriter().println("ERROR: index out of bound or negative array size.");
+            }
         }
 
         if (users != null) {
