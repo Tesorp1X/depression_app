@@ -5,6 +5,15 @@ plugins {
 group 'app.depression'
 version '0.1 - TEST VERSION'
 
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File',
+            'Main-Class': 'main.Main'
+    }
+    from { configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}}
+    with jar
+}
+
 repositories {
     mavenCentral()
 }
