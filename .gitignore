@@ -10,6 +10,12 @@ build
 */.idea/
 */build/
 
+# Ignore VS Code directories
+.vscode/
+*/.settings/
+.classpath
+.project
+
 *.kotlin_module
 
 # Compiled class file
