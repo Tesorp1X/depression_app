@@ -108,15 +108,17 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         UserDAO userDAO = new UserDAO(session);
-        UserDataSet userToDelete = userDAO.getUserByUsername(username);
-        if (!userDAO.deleteUserById(userToDelete.getId())) {
+        UserDataSet user_to_delete = userDAO.getUserByUsername(username);
+
+        boolean is_deleted = userDAO.deleteUserById(user_to_delete.getId());
+        transaction.commit();
+        session.close();
+
+        if (!is_deleted) {
 
             throw new NoSuchUserException(username);
         }
-
         //TODO: LOG INFO ABOUT DELETION.
-        transaction.commit();
-        session.close();
     }
 
     public void deleteUserByTelegram(String telegram) throws NoSuchUserException {
@@ -127,14 +129,14 @@ public class DBService {
         UserDAO userDAO = new UserDAO(session);
         UserDataSet user_to_delete = userDAO.getUserByTelegram(telegram);
 
-        if (!userDAO.deleteUserById(user_to_delete.getId())) {
+        boolean is_deleted = userDAO.deleteUserById(user_to_delete.getId());
+        transaction.commit();
+        session.close();
+        if (!is_deleted) {
 
             throw new NoSuchUserException(telegram);
         }
-
         //TODO: LOG INFO ABOUT DELETION.
-        transaction.commit();
-        session.close();
     }
 
     public void updateUser(String username, String new_password, String new_telegram) throws NoSuchUserException {
