@@ -21,6 +21,9 @@ public class ServletLogin extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        response.setContentType("text/plain;charset=utf-8");
+
         long returnedValue = -1;
         String username = request.getParameter("username");
         String password = request.getParameter("password");
@@ -28,12 +31,12 @@ public class ServletLogin extends HttpServlet {
         returnedValue = accountService.loginViaUsername(username, password);
 
         if (returnedValue == -1) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().println("ERROR: can't login. Incorrect username or password.");
         } else {
+            response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().print("User id in db: ");
             response.getWriter().println(returnedValue);
-            response.setContentType("text/html;charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_OK);
         }
     }
     
