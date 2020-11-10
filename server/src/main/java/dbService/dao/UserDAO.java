@@ -3,7 +3,7 @@ package dbService.dao;
 import dbService.NoSuchUserException;
 import dbService.dataSets.UserDataSet;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -26,6 +26,7 @@ public class UserDAO {
     }
 
     public UserDataSet getUserById(long id) {
+
         return session.get(UserDataSet.class, id);
     }
 
@@ -49,7 +50,7 @@ public class UserDAO {
 
     public boolean deleteUserById(long id) {
 
-        UserDataSet user = this.getUserById(id);
+        UserDataSet user = getUserById(id);
 
         if (user != null) {
             session.delete(user);
