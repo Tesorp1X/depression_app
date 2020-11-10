@@ -33,20 +33,21 @@ public class ServletGetUser extends HttpServlet {
         String username;
         UserAccount account = null;
 
-        if (telegramId == null) { //If user registered from site.
+        
+        if (telegramId == null) { //If user registered from site. 
+            
             username = request.getParameter("username");
 
             try {
                 account = accountService.getUserByUsername(username);
                 response.setStatus(HttpServletResponse.SC_OK);
-            } catch (NoSuchUserException | InvalidUsernameException e) {
-                if (e instanceof NoSuchUserException) {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("ERROR: can't get user! There is no such user");
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("ERROR: can't get user! Invalid username!");
-                }
+              
+            } catch (NoSuchUserException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
+            } catch (InvalidUsernameException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
             }
 
         } else {
@@ -54,14 +55,14 @@ public class ServletGetUser extends HttpServlet {
             try {
                 account = accountService.getUserByTelegram(telegramId);
                 response.setStatus(HttpServletResponse.SC_OK);
-            } catch (NoSuchUserException | InvalidUsernameException e) {
-                if (e instanceof NoSuchUserException) {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("ERROR: can't get user! There is no such user");
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    response.getWriter().println("ERROR: can't get user! Invalid username!");
-                }
+
+            } catch (NoSuchUserException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
+            } catch (InvalidUsernameException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
+
             }
         }
 

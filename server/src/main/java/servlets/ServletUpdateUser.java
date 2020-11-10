@@ -24,21 +24,30 @@ public class ServletUpdateUser extends HttpServlet {
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        response.setContentType("text/plain;charset=utf-8");
+
         String username = request.getParameter("username");
         String new_pass = request.getParameter("new_password");
         String new_telegramId = request.getParameter("new_telegramId");
 
         try {
-			accountService.updateUser(username, new_pass, new_telegramId);
+            accountService.updateUser(username, new_pass, new_telegramId);
+            response.setStatus(HttpServletResponse.SC_OK);
 		} catch (NoSuchUserException e) {
-			response.getWriter().println("ERROR: can't update user. There is no such user!");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.getWriter().println("ERROR: can't update user. " + e.toString());
 		} catch (InvalidUsernameOrPasswordException e) {
-			response.getWriter().println("ERROR: can't update user. Invalid username or new password");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.getWriter().println("ERROR: can't update user. " + e.toString());
 		} catch (InvalidTelegramIdException e) {
-			response.getWriter().println("ERROR: can't update user. Invalid new Telegram id");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.getWriter().println("ERROR: can't update user. " + e.toString());
 		}
         
-        response.getWriter().println("User: " + username + " updated.");
+        if (response.getStatus() == HttpServletResponse.SC_OK) {
+            response.getWriter().println("User: " + username + " updated.");
+        }
     }
     
 }
