@@ -10,7 +10,7 @@ build
 */.idea/
 */build/
 
-# Ignore VS Code directories
+# Ignore VS Code folders
 .vscode/
 */.settings/
 .classpath
