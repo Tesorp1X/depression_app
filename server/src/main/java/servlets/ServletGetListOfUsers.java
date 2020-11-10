@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -25,6 +26,8 @@ public class ServletGetListOfUsers extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        response.setContentType("text/plain;charset=utf-8");
+
         List<UserAccount> users = null;
 
         String start_point = request.getParameter("start_point");
@@ -35,20 +38,21 @@ public class ServletGetListOfUsers extends HttpServlet {
             String max_result = request.getParameter("max_result");
             try {
                 users = accountService.getListOfUsers(Integer.parseInt(start_point), Integer.parseInt(max_result));
-            } catch (IndexOutOfBoundsException | NegativeArraySizeException e) {
-                response.getWriter().println("ERROR: index out of bound or negative array size.");
+                response.setStatus(HttpServletResponse.SC_OK);
+            } catch (IndexOutOfBoundsException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("ERROR: index out of bound.");
+            } catch (NegativeArraySizeException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().println("ERROR: negative array size.");
             }
         }
 
         if (users != null) {
-            users.forEach(user ->
-            {
-			    try {
-				    response.getWriter().println(user.toString());
-			    } catch (IOException e) {
-				    e.getMessage();
-			    }
-            });
+            Iterator<UserAccount> iterator = users.iterator();
+            while(iterator.hasNext()) {
+                response.getWriter().println(iterator.next().toString());
+            }
         }
     }
 }

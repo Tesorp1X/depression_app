@@ -25,6 +25,8 @@ public class ServletDeleteUser extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+        response.setContentType("text/plain;charset=utf-8");;
+
         String telegramId = request.getParameter("t_id");
         String username;
 
@@ -32,31 +34,36 @@ public class ServletDeleteUser extends HttpServlet {
             username = request.getParameter("username");
 
             try {
-
                 accountService.deleteUserByUsername(username);
-            } catch (NoSuchUserException | InvalidUsernameException e) {
-
-                if (e instanceof NoSuchUserException) {
-                    response.getWriter().println("ERROR: can't get user! There is no such user.");
-                } else {
-                    response.getWriter().println("ERROR: can't get user! Invalid username!");
-                }
+                response.setStatus(HttpServletResponse.SC_OK);
+            } catch (NoSuchUserException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
+            } catch (InvalidUsernameException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
             }
-            response.getWriter().println("User with username: " + username + " deleted");
+
+            if (response.getStatus() == HttpServletResponse.SC_OK) {
+                response.getWriter().println("User with username: " + username + " deleted");
+            }
 
         } else {
+
             try {
-
                 accountService.deleteUserByTelegram(telegramId);
-            } catch (NoSuchUserException | InvalidTelegramIdException e) {
-
-                if (e instanceof NoSuchUserException) {
-                    response.getWriter().println("ERROR: can't get user! There is no such user.");
-                } else {
-                    response.getWriter().println("ERROR: can't get user! Invalid Telegram id!");
-                }
+                response.setStatus(HttpServletResponse.SC_OK);
+            } catch (NoSuchUserException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
+            } catch (InvalidTelegramIdException e) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't get user! " + e.toString());
             }
-            response.getWriter().println("User with Telegram id: " + telegramId + " deleted."); 
+
+            if (response.getStatus() == HttpServletResponse.SC_OK) {
+                response.getWriter().println("User with Telegram id: " + telegramId + " deleted."); 
+            }
         }
 
     }

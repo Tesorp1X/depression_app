@@ -28,6 +28,8 @@ public class ServletRegister extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        response.setContentType("text/plain;charset=utf-8");
+    
         String telegramId = request.getParameter("t_id");
         String username;
         String pass;
@@ -39,7 +41,8 @@ public class ServletRegister extends HttpServlet {
             try {
                 returnedValue = accountService.registerNewUser(username, pass);
             } catch (InvalidUsernameOrPasswordException e) {
-                response.getWriter().println("ERROR: can't register new user! Invalid username.");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't register new user! " + e.toString());
             }
             
         } else {
@@ -47,19 +50,20 @@ public class ServletRegister extends HttpServlet {
             try {
                 returnedValue = accountService.registerNewUser(telegramId); //If we added new user to db, then value changed to if of user.
             } catch (InvalidUsernameException e) {
-                response.getWriter().println("ERROR: can't register new user! Invalid username.");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println("ERROR: can't register new user! " + e.toString());
             }
         }
 
         if (returnedValue == -1) {
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
             response.getWriter().println("ERROR: can't register new user! User with such username is already exist.");
         } else {
+            response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().print("UUID: ");
             response.getWriter().println(telegramId);
             response.getWriter().print("User id in db: ");
             response.getWriter().println(returnedValue);
-            response.setContentType("text/html;charset=utf-8");
-            response.setStatus(HttpServletResponse.SC_OK);
         }
     }
 }
