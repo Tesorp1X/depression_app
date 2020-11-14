@@ -9,6 +9,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.Query;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,16 +24,16 @@ public class NoteDAO {
         this.session = session;
     }
 
-    public NoteDataSet getNoteById(long id) {
+    public NoteDataSet getById(long id) {
         return session.get(NoteDataSet.class, id);
     }
 
-    public long addNewNote(String name, int value, String description, java.util.Date date, long user_id) {
+    public long addNote(String name, int value, String description, java.util.Date date, long user_id) {
 
         return (Long) session.save(new NoteDataSet(name, value, date, description, user_id));
     }
 
-    public void changeNoteById(long id, String name, int value, String description, java.util.Date date, long user_id) {
+    public void updateById(long id, String name, int value, String description, java.util.Date date, long user_id) {
 
     }
 
@@ -42,7 +44,7 @@ public class NoteDAO {
 
     }*/
 
-    public boolean deleteNoteById(long id) {
+    public boolean deleteById(long id) {
 
         NoteDataSet note = session.load(NoteDataSet.class, id);
         if (note != null) {
@@ -51,6 +53,18 @@ public class NoteDAO {
         }
 
         return false;
+    }
+
+    public List<NoteDataSet> getList(long user_id) {
+        
+    }
+
+    public List<NoteDataSet> getList(long user_id, String name) {
+        
+    }
+
+    public List<NoteDataSet> getList(long user_id, Date start_date, Date end_date) {
+        
     }
 
 

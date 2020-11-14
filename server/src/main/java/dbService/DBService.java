@@ -5,6 +5,7 @@ import accountService.UserAccount;
 import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
+import noteService.Note;
 import dbService.dao.*;
 
 
@@ -13,6 +14,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -228,7 +230,39 @@ public class DBService {
 
     //Note manipulation
 
+    //TODO: JavaDoc and comments!
 
+    public long addNote(String name, String description, int value, long user_id) {
+        try {
+            Session session = sessionFactory.openSession();
+            Transaction transaction = session.beginTransaction();
+            NoteDAO noteDAO = new NoteDAO(session);
+            long id = noteDAO.addNote(name, value, description, new Date(), user_id);
+            transaction.commit();
+            session.close();
+
+            return id;
+
+        } catch (HibernateException e) {
+
+            return -1;
+        }
+    }
+
+    public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
+        Session session = sessionFactory.openSession();
+        NoteDAO noteDAO = new NoteDAO(session);
+        NoteDataSet noteDS = noteDAO.getById(note_id);
+        
+        session.close();
+
+        if (noteDS == null) {
+            throw new NoSuchNoteException(note_id + "");
+        }
+
+        return noteDS;
+
+    }
 
 
 }
