@@ -16,6 +16,8 @@ public class NoteService {
         return dbService.addNote(name, description, value, user_id);
     }
 
+
+    //TODO: Must return Note!
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
         return dbService.getNoteById(note_id);
     }
