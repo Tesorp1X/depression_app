@@ -55,7 +55,7 @@ public class NoteDAO {
         return false;
     }
 
-    public List<NoteDataSet> getList(long user_id) {
+    /*public List<NoteDataSet> getList(long user_id) {
         
     }
 
@@ -65,7 +65,7 @@ public class NoteDAO {
 
     public List<NoteDataSet> getList(long user_id, Date start_date, Date end_date) {
         
-    }
+    }*/
 
 
 }

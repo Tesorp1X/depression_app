@@ -5,9 +5,6 @@ import accountService.UserAccount;
 import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
-import noteService.Note;
-import dbService.dao.*;
-
 
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -16,6 +13,12 @@ import org.hibernate.service.ServiceRegistry;
 
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Root;
 
 /**
  * Utility class to handle data base manipulations.
@@ -66,14 +69,68 @@ public class DBService {
 
     /*       User manipulation      */
 
+    private UserDataSet getUserEntity(String field_name, String field_value) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<UserDataSet> criteria = builder.createQuery(UserDataSet.class);
+
+        Root<UserDataSet> from = criteria.from(UserDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<UserDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+        
+        session.close();
+
+        return typedQuery.getSingleResult();
+    }
+
+    private NoteDataSet getNoteEntity(String field_name, String field_value) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> criteria = builder.createQuery(NoteDataSet.class);
+
+        Root<NoteDataSet> from = criteria.from(NoteDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<NoteDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+        
+        session.close();
+
+        return typedQuery.getSingleResult();
+    }
+
+    private List<UserDataSet> getListOfUsers_(int start_point, int max_result) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<UserDataSet> cq = cb.createQuery(UserDataSet.class);
+        Root<UserDataSet> rootEntry = cq.from(UserDataSet.class);
+        CriteriaQuery<UserDataSet> all = cq.select(rootEntry);
+
+        TypedQuery<UserDataSet> allQuery = session.createQuery(all);
+        if (max_result != -1) {
+            allQuery.setFirstResult(start_point).setMaxResults(max_result);
+        }
+
+        return allQuery.getResultList();
+    }
+
 
     public long addUser(String username, String password) {
 
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            UserDAO userDAO = new UserDAO(session);
-            long id = userDAO.addNewUser(username, password);
+            long id = (Long) session.save(new UserDataSet(username, password));
             transaction.commit();
             session.close();
 
@@ -91,8 +148,7 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            UserDAO userDAO = new UserDAO(session);
-            long id = userDAO.addNewUser(username, password, telegram);
+            long id = (Long) session.save(new UserDataSet(username, password, telegram));
             transaction.commit();
             session.close();
 
@@ -109,9 +165,8 @@ public class DBService {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-        UserDAO userDAO = new UserDAO(session);
-        UserDataSet userToDelete = userDAO.getUserByUsername(username);
-        if (!userDAO.deleteUserById(userToDelete.getId())) {
+        UserDataSet userToDelete = getUserEntity("username", username);
+        if (userToDelete == null) {
 
             throw new NoSuchUserException(username);
         }
@@ -125,11 +180,8 @@ public class DBService {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-
-        UserDAO userDAO = new UserDAO(session);
-        UserDataSet user_to_delete = userDAO.getUserByTelegram(telegram);
-
-        if (!userDAO.deleteUserById(user_to_delete.getId())) {
+        UserDataSet userToDelete = getUserEntity("telegram", telegram);
+        if (userToDelete == null) {
 
             throw new NoSuchUserException(telegram);
         }
@@ -148,8 +200,7 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
-        UserDAO userDAO = new UserDAO(session);
-        userDAO.updateUser(user_to_update);
+        session.update(user_to_update);
 
         //TODO: LOG INFO ABOUT UPDATE.
         transaction.commit();
@@ -161,8 +212,7 @@ public class DBService {
 
         Session session = sessionFactory.openSession();
 
-        UserDAO userDAO = new UserDAO(session);
-        List<UserDataSet> result_list = userDAO.getListOfUsers();
+        List<UserDataSet> result_list = getListOfUsers_(-1, -1);
 
         session.close();
 
@@ -173,8 +223,7 @@ public class DBService {
 
         Session session = sessionFactory.openSession();
 
-        UserDAO userDAO = new UserDAO(session);
-        List<UserDataSet> result_list = userDAO.getListOfUsers(start_point, max_result);
+        List<UserDataSet> result_list = getListOfUsers_(start_point, max_result);
 
         session.close();
 
@@ -184,9 +233,8 @@ public class DBService {
     public UserDataSet findUserByUsername(String username) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
-        UserDAO userDAO = new UserDAO(session);
 
-        UserDataSet dataSet = userDAO.getUserByUsername(username);
+        UserDataSet dataSet = getUserEntity("username", username);
 
         session.close();
 
@@ -200,9 +248,8 @@ public class DBService {
     public UserDataSet findUserByTelegram(String telegram) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
-        UserDAO userDAO = new UserDAO(session);
 
-        UserDataSet dataSet = userDAO.getUserByTelegram(telegram);
+        UserDataSet dataSet = getUserEntity("telegram", telegram);
 
         session.close();
 
@@ -236,8 +283,7 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            NoteDAO noteDAO = new NoteDAO(session);
-            long id = noteDAO.addNote(name, value, description, new Date(), user_id);
+            long id = (Long) session.save(new NoteDataSet(name, value, new Date(), description, user_id));
             transaction.commit();
             session.close();
 
@@ -251,8 +297,7 @@ public class DBService {
 
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
         Session session = sessionFactory.openSession();
-        NoteDAO noteDAO = new NoteDAO(session);
-        NoteDataSet noteDS = noteDAO.getById(note_id);
+        NoteDataSet noteDS = session.get(NoteDataSet.class, note_id);
         
         session.close();
 
@@ -264,5 +309,38 @@ public class DBService {
 
     }
 
+    public void changeNote(long note_id, String new_name, String new_description, int new_value) throws NoSuchNoteException {
+        NoteDataSet note_to_update = getNoteById(note_id);
+        note_to_update.setName(new_name);
+        note_to_update.setDescription(new_description);
+        note_to_update.setValue(new_value);
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
+        session.update(note_to_update);
+
+        transaction.commit();
+        session.close();
+    }
+
+    public boolean deleteNoteById(long note_id) {
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
+        NoteDataSet note = session.load(NoteDataSet.class, note_id);
+
+        if (note != null) {
+            session.delete(note);
+            transaction.commit();
+            session.close();
+            return true;
+        }
+
+        transaction.commit();
+        session.close();
+        return false;
+    }
 
 }
