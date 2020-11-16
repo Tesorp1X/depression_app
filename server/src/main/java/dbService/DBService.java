@@ -295,6 +295,8 @@ public class DBService {
         }
     }
 
+    //TODO: get list of all notes.
+
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
         Session session = sessionFactory.openSession();
         NoteDataSet noteDS = session.get(NoteDataSet.class, note_id);
@@ -309,8 +311,9 @@ public class DBService {
 
     }
 
+    //TODO: think about calling getNoteById method.
     public void changeNote(long note_id, String new_name, String new_description, int new_value) throws NoSuchNoteException {
-        NoteDataSet note_to_update = getNoteById(note_id);
+        NoteDataSet note_to_update = getNoteById(note_id); //Is this good implementation?
         note_to_update.setName(new_name);
         note_to_update.setDescription(new_description);
         note_to_update.setValue(new_value);
