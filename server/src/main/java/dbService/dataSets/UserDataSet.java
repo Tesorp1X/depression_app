@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 
 @Entity
-@Table(name = "users")
+@Table(name = "users") //table name where data of this entity will be stored.
 public class UserDataSet implements Serializable {
 
     private static final long serialVersionUID = -7729539235975598423L;
