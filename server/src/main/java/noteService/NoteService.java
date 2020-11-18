@@ -2,8 +2,14 @@ package noteService;
 
 import dbService.DBService;
 import dbService.NoSuchNoteException;
+import dbService.NoSuchUserException;
 import dbService.dataSets.NoteDataSet;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
+//TODO: JavaDoc
 public class NoteService {
     
     private final DBService dbService;
@@ -17,8 +23,8 @@ public class NoteService {
     }
 
     //TODO: Must return Note!
-    //Or mustn't?
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
+
         return dbService.getNoteById(note_id);
     }
 
@@ -29,5 +35,19 @@ public class NoteService {
     public boolean deleteNote(long note_id) {
         return dbService.deleteNoteById(note_id);
     }
-    
+
+
+    public List<Note> getAllUserNotes(long user_id, String note_name) throws NoSuchUserException {
+
+        List<NoteDataSet> dataSetList = dbService.getListOfNotes(user_id, note_name);
+        List<Note> noteList = new ArrayList<>();
+
+        for (var o : dataSetList) {
+            noteList.add(new Note(o.getValue(),
+                    o.getName(), o.getDescription(),
+                    o.getUser_id(), o.getId(), o.getDate()));
+        }
+
+        return noteList;
+    }
 }

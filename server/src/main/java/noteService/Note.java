@@ -71,10 +71,11 @@ public class Note {
     @Override
     public String toString() {
         return "Expense Note [id = " + note_id
-                + "value = " + value
-                + "date = " + date.toString()
-                + "description = " + description
-                + "user_id = " + user_id;
+                + " name = " + name
+                + " value = " + value
+                + " date = " + date.toString()
+                + " description = " + description
+                + " user_id = " + user_id + "]";
     }
 
 }

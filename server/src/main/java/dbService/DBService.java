@@ -6,6 +6,7 @@ import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
 
+import noteService.Note;
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -23,6 +24,7 @@ import javax.persistence.criteria.Root;
 /**
  * Utility class to handle data base manipulations.
  * @author Tesorp1X
+ * @author KyMaKa
  */
 public class DBService {
 
@@ -66,8 +68,38 @@ public class DBService {
         return configuration;
     }
 
+    public void closeSessionFactory() {
+
+        sessionFactory.getCurrentSession().getTransaction().commit();
+        sessionFactory.getCurrentSession().close();
+        sessionFactory.close();
+    }
 
     /*       User manipulation      */
+
+    private UserDataSet getUserById(long id) throws NoSuchUserException {
+
+        Session session = sessionFactory.openSession();
+        UserDataSet dataset = session.get(UserDataSet.class, id);
+        session.close();
+
+        if (dataset == null) {
+            throw new NoSuchUserException();
+        }
+
+        return dataset;
+    }
+
+    private boolean verifyUserId(long user_id) {
+
+        try {
+            UserDataSet user = getUserById(user_id);
+        } catch (NoSuchUserException e) {
+            return false;
+        }
+
+        return true;
+    }
 
     private UserDataSet getUserEntity(String field_name, String field_value) {
 
@@ -88,24 +120,6 @@ public class DBService {
         return typedQuery.getSingleResult();
     }
 
-    private NoteDataSet getNoteEntity(String field_name, String field_value) {
-
-        Session session = sessionFactory.openSession();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<NoteDataSet> criteria = builder.createQuery(NoteDataSet.class);
-
-        Root<NoteDataSet> from = criteria.from(NoteDataSet.class);
-        ParameterExpression<String> nameParam = builder.parameter(String.class);
-        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
-
-        TypedQuery<NoteDataSet> typedQuery = session.createQuery(criteria);
-        typedQuery.setParameter(nameParam, field_value);
-        
-        session.close();
-
-        return typedQuery.getSingleResult();
-    }
 
     private List<UserDataSet> getListOfUsers_(int start_point, int max_result) {
 
@@ -277,6 +291,25 @@ public class DBService {
 
     //Note manipulation
 
+    private NoteDataSet getNoteEntity(String field_name, String field_value) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> criteria = builder.createQuery(NoteDataSet.class);
+
+        Root<NoteDataSet> from = criteria.from(NoteDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<NoteDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+
+        session.close();
+
+        return typedQuery.getSingleResult();
+    }
+
     //TODO: JavaDoc and comments!
 
     public long addNote(String name, String description, int value, long user_id) {
@@ -295,7 +328,6 @@ public class DBService {
         }
     }
 
-    //TODO: get list of all notes.
 
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
         Session session = sessionFactory.openSession();
@@ -345,5 +377,35 @@ public class DBService {
         session.close();
         return false;
     }
+
+
+    public List<NoteDataSet> getListOfNotes(long user_id, String note_name) throws NoSuchUserException {
+
+        if (!verifyUserId(user_id)) {
+            throw new NoSuchUserException();
+        }
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> cq = cb.createQuery(NoteDataSet.class);
+        Root<NoteDataSet> rootEntry = cq.from(NoteDataSet.class);
+        CriteriaQuery<NoteDataSet> userNotesCriteria;
+        if (note_name == null) {
+            userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id));
+        } else {
+            userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id),
+                                         cb.equal(rootEntry.get("name"), note_name));
+        }
+        List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
+
+        session.close();
+
+        return resultList;
+
+        
+    }
+
+
 
 }

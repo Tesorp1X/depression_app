@@ -32,6 +32,7 @@ public class ServletGetUser extends HttpServlet {
         String telegramId = request.getParameter("t_id");
         String username;
         UserAccount account = null;
+
         
         if (telegramId == null) { //If user registered from site. 
             
@@ -40,6 +41,7 @@ public class ServletGetUser extends HttpServlet {
             try {
                 account = accountService.getUserByUsername(username);
                 response.setStatus(HttpServletResponse.SC_OK);
+              
             } catch (NoSuchUserException e) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("ERROR: can't get user! " + e.toString());
@@ -47,18 +49,20 @@ public class ServletGetUser extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("ERROR: can't get user! " + e.toString());
             }
-            
+
         } else {
 
             try {
                 account = accountService.getUserByTelegram(telegramId);
                 response.setStatus(HttpServletResponse.SC_OK);
+
             } catch (NoSuchUserException e) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("ERROR: can't get user! " + e.toString());
             } catch (InvalidUsernameException e) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println("ERROR: can't get user! " + e.toString());
+
             }
         }
 
@@ -66,5 +70,5 @@ public class ServletGetUser extends HttpServlet {
             response.getWriter().print(account.toString());
         }
     }
-    
+
 }
