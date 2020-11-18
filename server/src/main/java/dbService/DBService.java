@@ -135,7 +135,10 @@ public class DBService {
             allQuery.setFirstResult(start_point).setMaxResults(max_result);
         }
 
-        return allQuery.getResultList();
+        List<UserDataSet> resultList = allQuery.getResultList();
+        session.close();
+
+        return resultList;
     }
 
 
@@ -185,6 +188,7 @@ public class DBService {
             throw new NoSuchUserException(username);
         }
 
+        session.delete(userToDelete);
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
         session.close();
@@ -200,6 +204,7 @@ public class DBService {
             throw new NoSuchUserException(telegram);
         }
 
+        session.delete(userToDelete);
         //TODO: LOG INFO ABOUT DELETION.
         transaction.commit();
         session.close();
@@ -224,24 +229,14 @@ public class DBService {
 
     public List<UserDataSet> getListOfUsers() {
 
-        Session session = sessionFactory.openSession();
 
-        List<UserDataSet> result_list = getListOfUsers_(-1, -1);
-
-        session.close();
-
-        return  result_list;
+        return getListOfUsers_(-1, -1);
     }
 
     public List<UserDataSet> getListOfUsers(int start_point, int max_result) {
 
-        Session session = sessionFactory.openSession();
 
-        List<UserDataSet> result_list = getListOfUsers_(start_point, max_result);
-
-        session.close();
-
-        return  result_list;
+        return getListOfUsers_(start_point, max_result);
     }
 
     public UserDataSet findUserByUsername(String username) throws NoSuchUserException {
@@ -378,7 +373,13 @@ public class DBService {
         return false;
     }
 
-
+    /**
+     * @param user_id user id in DB. If there is no such user the exception is being thrown.
+     * @param note_name if it is not empty, then list will consists of all notes with that name.
+     * @return  a list of NoteDataSet. If note_name is empty, then list will consists of all notes for given user.
+     * @throws NoSuchUserException if given user id doesn't point to any user row in DB.
+     * @author Tesorp1X
+     * */
     public List<NoteDataSet> getListOfNotes(long user_id, String note_name) throws NoSuchUserException {
 
         if (!verifyUserId(user_id)) {
@@ -391,12 +392,14 @@ public class DBService {
         CriteriaQuery<NoteDataSet> cq = cb.createQuery(NoteDataSet.class);
         Root<NoteDataSet> rootEntry = cq.from(NoteDataSet.class);
         CriteriaQuery<NoteDataSet> userNotesCriteria;
+
         if (note_name == null) {
             userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id));
         } else {
             userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id),
                                          cb.equal(rootEntry.get("name"), note_name));
         }
+
         List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
 
         session.close();
