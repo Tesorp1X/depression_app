@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import dbService.NoSuchNoteException;
+import dbService.dataSets.NoteDataSet;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,13 +27,14 @@ public class ServletGetNote extends HttpServlet {
         String name;
         long user_id;
         long note_id;
+        NoteDataSet note = null;
 
         name = request.getParameter("name");
         if (name == null) {
             note_id = Long.getLong(request.getParameter("note_id"));
 
             try {
-                noteService.getNoteById(note_id);
+                note = noteService.getNoteById(note_id);
                 response.setStatus(HttpServletResponse.SC_OK);
 			} catch (NoSuchNoteException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -41,6 +43,13 @@ public class ServletGetNote extends HttpServlet {
         } else {
             user_id = Long.getLong(request.getParameter("user_id"));
             //TODO: get list of multiple notes with same name.
+        }
+
+
+        if (response.getStatus() == HttpServletResponse.SC_OK) {
+            response.getWriter().println(note.toString());
+        } else {
+            response.getWriter().println("Can't find note with such parameters");
         }
     }
     
