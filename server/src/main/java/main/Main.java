@@ -2,12 +2,8 @@ package main;
 
 import accountService.AccountService;
 import dbService.DBService;
-import servlets.ServletDeleteUser;
-import servlets.ServletGetListOfUsers;
-import servlets.ServletGetUser;
-import servlets.ServletLogin;
-import servlets.ServletRegister;
-import servlets.ServletUpdateUser;
+import noteService.NoteService;
+import servlets.*;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -21,8 +17,11 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         //Services
-        AccountService accountService = new AccountService(new DBService());
-        //AccountService accountService = new AccountService(dbService);
+        DBService dbService = new DBService();
+        //AccountService accountService = new AccountService(new DBService());
+        AccountService accountService = new AccountService(dbService);
+        //NoteService noteService = new NoteService(new DBService());
+        NoteService noteService = new NoteService(dbService);
 
         //Servlets
         /* !!! Put accountService into users servlets. !!!  */
@@ -35,6 +34,9 @@ public class Main {
         ServletGetListOfUsers sGetListOfUsers = new ServletGetListOfUsers(accountService);
         ServletLogin sLogin = new ServletLogin(accountService);
 
+        //Note Servlets
+        /* !!! Put NoteService into notes servlets. !!!  */
+        ServletGetListOfNotes sGetListOfNotes = new ServletGetListOfNotes(noteService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -45,6 +47,9 @@ public class Main {
         context.addServlet(new ServletHolder(sUpdateUser), "/UpdateUser");
         context.addServlet(new ServletHolder(sGetListOfUsers), "/GetListOfUsers");
         context.addServlet(new ServletHolder(sLogin), "/Login");
+
+        context.addServlet(new ServletHolder(sGetListOfNotes), "/GetListOfNotes");
+
 
         //Server itself
         Server server = new Server(8080);
