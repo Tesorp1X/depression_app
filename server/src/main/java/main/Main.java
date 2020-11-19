@@ -68,12 +68,13 @@ public class Main {
 
         //TODO: Handle exceptions.
         server.start();
-        server.join();
-
+        
         //If everything is alright then we can start server from console too.
         //TODO: test it!
         ConsoleParser parser = new ConsoleParser(args, dbService, server);
+
         parser.parseCMD();
+        server.join();
 
 
     }
