@@ -67,8 +67,8 @@ public class Main {
         ConsoleParser parser = new ConsoleParser(args, dbService, server);
 
         //If everything is alright then we can start server from console too.
-        //TODO: test it!
-        parser.parseCMD();
+        //TODO: parser should be a thread.
+        parser.run();
 
         //TODO: Handle exceptions.
         //server.start();

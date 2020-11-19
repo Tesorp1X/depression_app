@@ -6,11 +6,12 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.Server;
 
 import dbService.DBService;
 
-public class ConsoleParser {
+public class ConsoleParser extends Thread {
 
     private String[] args; 
     private DBService dbService;
@@ -28,14 +29,24 @@ public class ConsoleParser {
     CommandLineParser parser = new  DefaultParser();
     CommandLine cmd;
 
-    public void parseCMD() throws Exception {
+    public void run() {
         options = parseOptions.createOptions();
-        cmd = parser.parse(options, args);
+        try {
+			cmd = parser.parse(options, args);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         if (cmd.hasOption("exit")) {
             dbService.closeSessionFactory();
             System.out.println("All sessions are closed");
-            server.stop();
+            try {
+                server.stop();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+            }
             System.exit(0);
         }
         if (cmd.hasOption("check")) {
@@ -45,11 +56,21 @@ public class ConsoleParser {
         if (cmd.hasOption("stop")) {
             dbService.closeSessionFactory();
             System.out.println("All sessions are closed");
-            server.stop();
+            try {
+				server.stop();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             return;
         }
         if (cmd.hasOption("start")) {
-            server.start();
+            try {
+				server.start();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
 
     }
