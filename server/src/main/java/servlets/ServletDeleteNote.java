@@ -36,10 +36,10 @@ public class ServletDeleteNote extends HttpServlet {
         boolean deleted = false;
         List<Note> notes = null;
 
-        note_id = Long.parseLong(request.getParameter("note_id"));
+        name = (request.getParameter("name"));
 
-        if (note_id == -1) {
-            name = request.getParameter("name");
+        if (name != null) {
+            //name = request.getParameter("name");
             name = (name != null) ? name.replace("\"", "") : null;
             user_id = Long.parseLong(request.getParameter("user_id"));
             try {
@@ -50,6 +50,7 @@ public class ServletDeleteNote extends HttpServlet {
 				response.getWriter().println("Can't delete note: " + e.getMessage());
 			}
         } else {
+            note_id = Long.parseLong(request.getParameter("note_id"));
             deleted = noteService.deleteNote(note_id);
         }
 
