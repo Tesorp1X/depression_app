@@ -6,7 +6,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.Server;
 
 import dbService.DBService;
@@ -36,11 +35,18 @@ public class ConsoleParser {
         if (cmd.hasOption("exit")) {
             dbService.closeSessionFactory();
             System.out.println("All sessions are closed");
-            server.stop();            
-        } else {
-            if (cmd.hasOption("check")) {
-                System.out.println("Checked");
-            }
+            server.stop();
+            System.exit(0);
+        }
+        if (cmd.hasOption("check")) {
+            System.out.println("Checked");
+            return;
+        }
+        if (cmd.hasOption("stop")) {
+            dbService.closeSessionFactory();
+            System.out.println("All sessions are closed");
+            server.stop();
+            return;
         }
 
     }
