@@ -40,6 +40,7 @@ public class NoteDataSet implements Serializable {
         this.value = value;
         this.date = date;
         this.description = description;
+        this.user_id = user_id;
     }
 
     public void setName(String name) {

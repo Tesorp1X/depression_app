@@ -48,6 +48,9 @@ public class ConsoleParser {
             server.stop();
             return;
         }
+        if (cmd.hasOption("start")) {
+            server.start();
+        }
 
     }
     

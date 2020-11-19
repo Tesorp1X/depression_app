@@ -64,17 +64,15 @@ public class Main {
         //Server itself
         Server server = new Server(8080);
         server.setHandler(context);
-
-
-        //TODO: Handle exceptions.
-        server.start();
-        
-        //If everything is alright then we can start server from console too.
-        //TODO: test it!
         ConsoleParser parser = new ConsoleParser(args, dbService, server);
 
+        //If everything is alright then we can start server from console too.
+        //TODO: test it!
         parser.parseCMD();
-        server.join();
+
+        //TODO: Handle exceptions.
+        //server.start();
+        //server.join();
 
 
     }

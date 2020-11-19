@@ -10,6 +10,7 @@ public class ParseOptions {
         options.addOption("exit", false, "Close connection with server and stops it + closes cmd");
         options.addOption("check", false, "Writes checked");
         options.addOption("stop", false, "Close connection with server and stops it");
+        options.addOption("start", false, "Starts server");
         return options;
     }
 
