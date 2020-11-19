@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import noteService.NoteService;
 
+/**
+ * @author KyMaKa
+ * URL: /AddNote
+ */
 public class ServletAddNote extends HttpServlet {
     private NoteService noteService;
 

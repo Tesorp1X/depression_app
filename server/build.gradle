@@ -39,5 +39,8 @@ dependencies {
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
     implementation 'mysql:mysql-connector-java:8.0.21'
 
+    // https://mvnrepository.com/artifact/commons-cli/commons-cli
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
 
 }

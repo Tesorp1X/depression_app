@@ -3,8 +3,10 @@ package main;
 import accountService.AccountService;
 import dbService.DBService;
 import noteService.NoteService;
+import parser.ConsoleParser;
 import servlets.*;
 
+import org.apache.commons.cli.CommandLine;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -37,6 +39,10 @@ public class Main {
         //Note Servlets
         /* !!! Put NoteService into notes servlets. !!!  */
         ServletGetListOfNotes sGetListOfNotes = new ServletGetListOfNotes(noteService);
+        ServletAddNote sAddNote = new ServletAddNote(noteService);
+        ServletChangeNote sChangeNote = new ServletChangeNote(noteService);
+        ServletDeleteNote sDeleteNote = new ServletDeleteNote(noteService);
+        ServletGetNote sGetNote = new ServletGetNote(noteService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -49,6 +55,10 @@ public class Main {
         context.addServlet(new ServletHolder(sLogin), "/Login");
 
         context.addServlet(new ServletHolder(sGetListOfNotes), "/GetListOfNotes");
+        context.addServlet(new ServletHolder(sAddNote), "/AddNote");
+        context.addServlet(new ServletHolder(sChangeNote), "/ChangeNote");
+        context.addServlet(new ServletHolder(sDeleteNote), "/DeleteNote");
+        context.addServlet(new ServletHolder(sGetNote), "/GetNote");
 
 
         //Server itself
@@ -59,6 +69,12 @@ public class Main {
         //TODO: Handle exceptions.
         server.start();
         server.join();
+
+        //If everything is alright then we can start server from console too.
+        //TODO: test it!
+        ConsoleParser parser = new ConsoleParser(args, dbService, server);
+        parser.parseCMD();
+
 
     }
 }
