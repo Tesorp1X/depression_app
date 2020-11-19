@@ -1,17 +1,26 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import dbService.NoSuchNoteException;
+import dbService.NoSuchUserException;
 import dbService.dataSets.NoteDataSet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import noteService.Note;
 import noteService.NoteService;
 
+/**
+ * @author KyMaKa
+ * URL: /GetNote
+ * Param: name & user_id || note_id
+ */
 public class ServletGetNote extends HttpServlet {
 
     private NoteService noteService;
@@ -28,6 +37,7 @@ public class ServletGetNote extends HttpServlet {
         long user_id;
         long note_id;
         NoteDataSet note = null;
+        List<Note> notes = null;
 
         name = request.getParameter("name");
         if (name == null) {
@@ -42,14 +52,28 @@ public class ServletGetNote extends HttpServlet {
 			}
         } else {
             user_id = Long.getLong(request.getParameter("user_id"));
-            //TODO: get list of multiple notes with same name.
+            try {
+                notes = noteService.getAllUserNotes(user_id, name);
+                response.setStatus(HttpServletResponse.SC_OK);
+			} catch (NoSuchUserException e) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Can't get note: " + e.getMessage());
+			}
         }
 
 
-        if (response.getStatus() == HttpServletResponse.SC_OK) {
+        if (response.getStatus() == HttpServletResponse.SC_OK && notes == null) {
             response.getWriter().println(note.toString());
         } else {
-            response.getWriter().println("Can't find note with such parameters");
+            if (notes != null) {
+                PrintWriter writer = response.getWriter();
+                for (var tmp : notes) {
+                    writer.println(tmp.toString());
+                }
+                writer.close();
+            } else {
+                response.getWriter().println("Can't find note with such parameters");
+            }
         }
     }
     
