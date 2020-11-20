@@ -53,7 +53,7 @@ public class ServletDeleteNote extends HttpServlet {
             deleted = noteService.deleteNote(note_id);
         }
 
-        if (deleted == true) {
+        if (deleted) {
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("Note with id: " + note_id + " deleted!");
         } else {

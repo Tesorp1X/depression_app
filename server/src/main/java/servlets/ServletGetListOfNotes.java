@@ -33,6 +33,8 @@ public class ServletGetListOfNotes extends HttpServlet {
         String user_id = request.getParameter("user_id");
         String note_name = request.getParameter("name");
         note_name = (note_name != null) ? note_name.replace("\"", "") : null;
+        String start_date = request.getParameter("start_date");
+        String end_date = request.getParameter("end_date");
 
 
         if (!user_id.matches("\\d+")) {
@@ -42,7 +44,14 @@ public class ServletGetListOfNotes extends HttpServlet {
         }
 
         try {
-            List<Note> notes = noteService.getAllUserNotes(Long.parseLong(user_id), note_name);
+            List<Note> notes;
+
+            if (start_date == null || end_date == null) {
+                notes = noteService.getAllUserNotes(Long.parseLong(user_id), note_name);
+            } else {
+                notes = noteService.getAllUserNotesInTimePeriod(Long.parseLong(user_id), start_date, end_date);
+            }
+            //TODO: warp into json
             //TODO: Handle empty lists(no notes for user or no notes with given name)
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/plain;charset=utf-8");

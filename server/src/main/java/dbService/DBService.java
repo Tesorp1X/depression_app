@@ -12,7 +12,9 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
-import java.util.Date;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -311,9 +313,19 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            long id = (Long) session.save(new NoteDataSet(name, value, new Date(), description, user_id));
+            //TODO: generate date and test it.
+            /*
+            * System.currentTimeMillis()
+            * long now = java.time.Instant.now().toEpochMilli();
+            */
+
+            long id = (Long) session.save(
+                    new NoteDataSet(name, value,
+                            new Date(System.currentTimeMillis()), description, user_id));
             transaction.commit();
             session.close();
+
+
 
             return id;
 
@@ -405,10 +417,34 @@ public class DBService {
         session.close();
 
         return resultList;
-
-        
     }
 
+//TODO: think about polymorphic solution.
+    public List<NoteDataSet> getListOfNotes(long user_id, Date start_date, Date end_date) throws NoSuchUserException {
 
+        if (!verifyUserId(user_id)) {
+            throw new NoSuchUserException();
+        }
+
+        if (end_date.compareTo(start_date) > 0) {
+            throw new IllegalArgumentException();
+        }
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> cq = cb.createQuery(NoteDataSet.class);
+        Root<NoteDataSet> rootEntry = cq.from(NoteDataSet.class);
+        CriteriaQuery<NoteDataSet> userNotesCriteria;
+
+        userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id),
+                cb.between(rootEntry.get("date"), start_date, end_date));
+
+        List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
+
+        session.close();
+
+        return resultList;
+    }
 
 }

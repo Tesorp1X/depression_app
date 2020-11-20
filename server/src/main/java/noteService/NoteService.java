@@ -5,6 +5,9 @@ import dbService.NoSuchNoteException;
 import dbService.NoSuchUserException;
 import dbService.dataSets.NoteDataSet;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,30 @@ public class NoteService {
     public List<Note> getAllUserNotes(long user_id, String note_name) throws NoSuchUserException {
 
         List<NoteDataSet> dataSetList = dbService.getListOfNotes(user_id, note_name);
+        List<Note> noteList = new ArrayList<>();
+
+        for (var o : dataSetList) {
+            noteList.add(new Note(o.getValue(),
+                    o.getName(), o.getDescription(),
+                    o.getUser_id(), o.getId(), o.getDate()));
+        }
+
+        return noteList;
+    }
+
+    public List<Note> getAllUserNotesInTimePeriod(long user_id, String start_date, String end_date) throws NoSuchUserException {
+
+        Date db_date_start;
+        Date db_date_end;
+        try {
+            db_date_start = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(start_date)).getTime());
+            db_date_end = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(end_date)).getTime());
+        } catch (ParseException e) {
+
+            throw new IllegalArgumentException(e);
+        }
+
+        List<NoteDataSet> dataSetList = dbService.getListOfNotes(user_id, db_date_start, db_date_end);
         List<Note> noteList = new ArrayList<>();
 
         for (var o : dataSetList) {
