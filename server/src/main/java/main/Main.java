@@ -43,6 +43,7 @@ public class Main {
         ServletChangeNote sChangeNote = new ServletChangeNote(noteService);
         ServletDeleteNote sDeleteNote = new ServletDeleteNote(noteService);
         ServletGetNote sGetNote = new ServletGetNote(noteService);
+        ServletGetReport sGetReport = new ServletGetReport(noteService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -59,6 +60,7 @@ public class Main {
         context.addServlet(new ServletHolder(sChangeNote), "/ChangeNote");
         context.addServlet(new ServletHolder(sDeleteNote), "/DeleteNote");
         context.addServlet(new ServletHolder(sGetNote), "/GetNote");
+        context.addServlet(new ServletHolder(sGetReport), "/GetReport");
 
 
         //Server itself

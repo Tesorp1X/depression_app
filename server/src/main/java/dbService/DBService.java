@@ -6,15 +6,13 @@ import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
 
-import noteService.Note;
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -426,7 +424,7 @@ public class DBService {
             throw new NoSuchUserException();
         }
 
-        if (end_date.compareTo(start_date) > 0) {
+        if (end_date.compareTo(start_date) < 0) {
             throw new IllegalArgumentException();
         }
 
