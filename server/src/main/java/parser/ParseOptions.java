@@ -1,22 +1,35 @@
 package parser;
 
-import org.apache.commons.cli.Options;
+import org.eclipse.jetty.server.Server;
+
+import dbService.DBService;
 
 public class ParseOptions {
+    private Server server;
+    private DBService dbService;
+    private OptionStart start;
+    private OptionStop stop;
+    private OptionExit exit;
 
-    Options options = new Options();
-
-    public Options createOptions() {
-        options.addOption("exit", false, "Close connection with server and stops it + closes cmd");
-        options.addOption("check", false, "Writes checked");
-        options.addOption("stop", false, "Close connection with server and stops it");
-        options.addOption("start", false, "Starts server");
-        return options;
+    public ParseOptions(Server server, DBService dbService) {
+        this.server = server;
+        this.dbService = dbService;
+        this.exit = new OptionExit();
+        this.stop = new OptionStop();
+        this.start = new OptionStart();
     }
 
-    //TODO: add new option.
-    //Possibe one more class to represent option.
-    public void addOption() {
+    public void parse(String name) {
+        if (name == "start") {
+            start.run(server);
+        }
 
+        if (name == "stop") {
+            stop.run(server, dbService);
+        }
+
+        if (name == "exit") {
+            exit.run(server, dbService);
+        }
     }
 }

@@ -6,7 +6,6 @@ import noteService.NoteService;
 import parser.ConsoleParser;
 import servlets.*;
 
-import org.apache.commons.cli.CommandLine;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -66,15 +65,14 @@ public class Main {
         //Server itself
         Server server = new Server(8080);
         server.setHandler(context);
-        ConsoleParser parser = new ConsoleParser(args, dbService, server);
 
-        //If everything is alright then we can start server from console too.
-        //TODO: parser should be a thread.
-        parser.run();
+        //TODO: parser new implementation.
+        /*ConsoleParser parser = new ConsoleParser(args, dbService, server);
+        parser.listenCMD(); */
 
         //TODO: Handle exceptions.
-        //server.start();
-        //server.join();
+        server.start();
+        server.join();
 
 
     }
