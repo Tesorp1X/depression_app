@@ -1,29 +1,21 @@
 package servlets;
 
 import dbService.NoSuchUserException;
-import noteService.Note;
 import noteService.NoteService;
+import noteService.ReportClass;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import java.util.List;
+public class ServletGetReport extends HttpServlet {
 
-/**
- * @author Tesrp1X
- * Now returns only list of all notes. URL params only user_id.
- * Url : /GetListOfNotes.
- */
-public class ServletGetListOfNotes extends HttpServlet {
-    //TODO: add start_date and end_date option.
     private final NoteService noteService;
 
-    public ServletGetListOfNotes(NoteService noteService) {
+    public ServletGetReport(NoteService noteService) {
         this.noteService = noteService;
     }
 
@@ -31,11 +23,8 @@ public class ServletGetListOfNotes extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String user_id = request.getParameter("user_id");
-        String note_name = request.getParameter("name");
-        note_name = (note_name != null) ? note_name.replace("\"", "") : null;
         String start_date = request.getParameter("start_date");
         String end_date = request.getParameter("end_date");
-
 
         if (!user_id.matches("\\d+")) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -44,22 +33,18 @@ public class ServletGetListOfNotes extends HttpServlet {
         }
 
         try {
-            List<Note> notes;
-
-            if (start_date == null || end_date == null) {
-                notes = noteService.getAllUserNotes(Long.parseLong(user_id), note_name);
-            } else {
-                notes = noteService.getAllUserNotesInTimePeriod(Long.parseLong(user_id), start_date, end_date);
-            }
-            //TODO: warp into json
-            //TODO: Handle empty lists(no notes for user or no notes with given name)
+            ReportClass report = noteService.getReport(Long.parseLong(user_id), start_date, end_date);
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("text/plain;charset=utf-8");
+
             PrintWriter writer = response.getWriter();
-            for (var note : notes) {
+            writer.println("Expense notes for period from " + start_date + " until " + end_date + " are:");
+            for (var note : report.getNotesUsedInReport()) {
                 writer.println(note.toString());
             }
+            writer.println("Total of : " + report.getOverall_sum() + "RUR.");
             writer.close();
+
 
         } catch (NoSuchUserException e) {
 
@@ -73,5 +58,6 @@ public class ServletGetListOfNotes extends HttpServlet {
             response.setContentType("text/plain;charset=utf-8");
             response.getWriter().println("ERROR: Date must be in YYYY-MM-DD format!");
         }
+
     }
 }
