@@ -20,15 +20,15 @@ public class ParseOptions {
     }
 
     public void parse(String name) {
-        if (name == "start") {
+        if (name.equals("start")) {
             start.run(server);
         }
 
-        if (name == "stop") {
+        if (name.equals("stop")) {
             stop.run(server, dbService);
         }
 
-        if (name == "exit") {
+        if (name.equals("exit")) {
             exit.run(server, dbService);
         }
     }
