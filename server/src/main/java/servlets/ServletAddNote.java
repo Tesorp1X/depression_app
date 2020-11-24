@@ -29,6 +29,7 @@ public class ServletAddNote extends HttpServlet {
         long user_id;
         
         name = request.getParameter("name");
+        name = (name != null) ? name.replace("\"", "") : null;
         description = request.getParameter("description");
         value = Integer.parseInt(request.getParameter("value"));
         user_id = Long.parseLong(request.getParameter("user_id"));

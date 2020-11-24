@@ -25,6 +25,7 @@ public class ServletChangeNote extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         long note_id = Long.parseLong(request.getParameter("note_id"));
         String newName = request.getParameter("new_name");
+        newName = (newName != null) ? newName.replace("\"", "") : null;
         String newDescription = request.getParameter("new_description");
         int newValue = Integer.parseInt(request.getParameter("new_value"));
 
