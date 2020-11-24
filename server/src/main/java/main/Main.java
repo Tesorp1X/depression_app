@@ -67,12 +67,12 @@ public class Main {
         server.setHandler(context);
 
         //TODO: parser new implementation.
-        /*ConsoleParser parser = new ConsoleParser(args, dbService, server);
-        parser.listenCMD(); */
+        ConsoleParser parser = new ConsoleParser(args, dbService, server);
+        parser.listenCMD();
 
-        //TODO: Handle exceptions.
-        server.start();
-        server.join();
+        //Debug only
+        /*server.start();
+        server.join();*/
 
 
     }

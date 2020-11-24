@@ -15,6 +15,7 @@ import java.sql.Date;
 
 import java.util.List;
 
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -70,9 +71,17 @@ public class DBService {
 
     public void closeSessionFactory() {
 
-        sessionFactory.getCurrentSession().getTransaction().commit();
-        sessionFactory.getCurrentSession().close();
-        sessionFactory.close();
+        try {
+            sessionFactory.getCurrentSession().getTransaction().commit();
+            sessionFactory.getCurrentSession().close();
+            System.out.println("All session are closed.");
+        } catch (HibernateException e) {
+            System.out.println("All session are closed.");
+        } finally {
+            sessionFactory.close();
+        }
+
+
     }
 
     /*       User manipulation      */
@@ -101,7 +110,7 @@ public class DBService {
         return true;
     }
 
-    private UserDataSet getUserEntity(String field_name, String field_value) {
+    private UserDataSet getUserEntity(String field_name, String field_value) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
 
@@ -114,10 +123,20 @@ public class DBService {
 
         TypedQuery<UserDataSet> typedQuery = session.createQuery(criteria);
         typedQuery.setParameter(nameParam, field_value);
-        
-        session.close();
 
-        return typedQuery.getSingleResult();
+        try {
+
+            return typedQuery.getSingleResult();
+
+        } catch (NoResultException e) {
+
+            throw new NoSuchUserException(field_value);
+
+        }
+        finally {
+            session.close();
+        }
+
     }
 
 
@@ -300,9 +319,10 @@ public class DBService {
         TypedQuery<NoteDataSet> typedQuery = session.createQuery(criteria);
         typedQuery.setParameter(nameParam, field_value);
 
+        NoteDataSet result = typedQuery.getSingleResult();
         session.close();
 
-        return typedQuery.getSingleResult();
+        return result;
     }
 
     //TODO: JavaDoc and comments!

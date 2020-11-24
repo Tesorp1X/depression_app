@@ -26,10 +26,12 @@ public class ServletRegister extends HttpServlet {
      */
     private static final long serialVersionUID = 1L;
 
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         response.setContentType("text/plain;charset=utf-8");
-    
+
+
+        boolean is_bot = Boolean.parseBoolean(request.getParameter("is_bot"));
         String telegramId = request.getParameter("t_id");
         String username;
         String pass;
@@ -60,10 +62,12 @@ public class ServletRegister extends HttpServlet {
             response.getWriter().println("ERROR: can't register new user! User with such username is already exist.");
         } else {
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().print("UUID: ");
-            response.getWriter().println(telegramId);
-            response.getWriter().print("User id in db: ");
-            response.getWriter().println(returnedValue);
+            if (!is_bot) {
+                response.getWriter().print("UUID: ");
+                response.getWriter().println(telegramId);
+                response.getWriter().print("User id in db: ");
+            }
+            response.getWriter().print(returnedValue);
         }
     }
 }
