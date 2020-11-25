@@ -52,6 +52,7 @@ public class Main {
         context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
         context.addServlet(new ServletHolder(sUpdateUser), "/UpdateUser");
         context.addServlet(new ServletHolder(sGetListOfUsers), "/GetListOfUsers");
+
         context.addServlet(new ServletHolder(sLogin), "/Login");
 
         context.addServlet(new ServletHolder(sGetListOfNotes), "/GetListOfNotes");

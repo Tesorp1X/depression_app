@@ -390,7 +390,7 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
-        NoteDataSet note = session.load(NoteDataSet.class, note_id);
+        NoteDataSet note = session.get(NoteDataSet.class, note_id);
 
         if (note != null) {
             session.delete(note);

@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'app.depression'
-version '0.59.3-TEST_VERSION'
+version '0.6.1-TEST_VERSION'
 
 task fatJar(type: Jar) {
     manifest {
@@ -38,9 +38,6 @@ dependencies {
 
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.21'
     implementation 'mysql:mysql-connector-java:8.0.21'
-
-    // https://mvnrepository.com/artifact/commons-cli/commons-cli
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
 
 }
