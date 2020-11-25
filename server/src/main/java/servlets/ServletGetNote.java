@@ -40,6 +40,7 @@ public class ServletGetNote extends HttpServlet {
         List<Note> notes = null;
 
         name = request.getParameter("name");
+        name = (name != null) ? name.replace("\"", "") : null;
         if (name == null) {
             note_id = Long.getLong(request.getParameter("note_id"));
 
