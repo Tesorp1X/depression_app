@@ -23,7 +23,7 @@ import noteService.NoteService;
  */
 public class ServletGetNote extends HttpServlet {
 
-    private NoteService noteService;
+    private final NoteService noteService;
 
     public ServletGetNote(NoteService noteService) {
         this.noteService = noteService;
@@ -36,7 +36,7 @@ public class ServletGetNote extends HttpServlet {
         String name;
         long user_id;
         long note_id;
-        NoteDataSet note = null;
+        Note note = null;
         List<Note> notes = null;
 
         name = request.getParameter("name");
@@ -63,6 +63,7 @@ public class ServletGetNote extends HttpServlet {
 
 
         if (response.getStatus() == HttpServletResponse.SC_OK && notes == null) {
+            assert note != null;
             response.getWriter().println(note.toString());
         } else {
             if (notes != null) {

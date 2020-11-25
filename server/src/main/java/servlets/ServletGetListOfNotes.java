@@ -18,6 +18,7 @@ import java.util.List;
  * @author Tesrp1X
  * Now returns only list of all notes. URL params only user_id.
  * Url : /GetListOfNotes.
+ * url_params : user_id ; name ; start_date = YYYY-MM-DD ; end_date = YYYY-MM-DD.
  */
 public class ServletGetListOfNotes extends HttpServlet {
     //TODO: add start_date and end_date option.

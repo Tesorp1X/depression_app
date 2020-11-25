@@ -20,7 +20,7 @@ import dbService.dataSets.NoteDataSet;
  */
 public class ServletDeleteNote extends HttpServlet {
 
-    private NoteService noteService;
+    private final NoteService noteService;
 
     public ServletDeleteNote(NoteService noteService) {
         this.noteService = noteService;
@@ -40,7 +40,7 @@ public class ServletDeleteNote extends HttpServlet {
 
         if (name != null) {
             //name = request.getParameter("name");
-            name = (name != null) ? name.replace("\"", "") : null;
+            name = name.replace("\"", "");
             user_id = Long.parseLong(request.getParameter("user_id"));
             try {
                 notes = noteService.getAllUserNotes(user_id, name);

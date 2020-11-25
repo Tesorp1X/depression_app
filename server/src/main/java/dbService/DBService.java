@@ -248,7 +248,6 @@ public class DBService {
 
     public List<UserDataSet> getListOfUsers() {
 
-
         return getListOfUsers_(-1, -1);
     }
 
@@ -355,13 +354,14 @@ public class DBService {
 
 
     public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
+
         Session session = sessionFactory.openSession();
         NoteDataSet noteDS = session.get(NoteDataSet.class, note_id);
         
         session.close();
 
         if (noteDS == null) {
-            throw new NoSuchNoteException(note_id + "");
+            throw new NoSuchNoteException("id " + note_id);
         }
 
         return noteDS;
@@ -370,6 +370,7 @@ public class DBService {
 
     //TODO: think about calling getNoteById method.
     public void changeNote(long note_id, String new_name, String new_description, int new_value) throws NoSuchNoteException {
+
         NoteDataSet note_to_update = getNoteById(note_id); //Is this good implementation?
         note_to_update.setName(new_name);
         note_to_update.setDescription(new_description);
@@ -409,7 +410,7 @@ public class DBService {
      * @return  a list of NoteDataSet. If note_name is empty, then list will consists of all notes for given user.
      * @throws NoSuchUserException if given user id doesn't point to any user row in DB.
      * @author Tesorp1X
-     * */
+     */
     public List<NoteDataSet> getListOfNotes(long user_id, String note_name) throws NoSuchUserException {
 
         if (!verifyUserId(user_id)) {
@@ -437,9 +438,16 @@ public class DBService {
         return resultList;
     }
 
-//TODO: think about polymorphic solution.
+    /**
+     * @param user_id user id in DB. If there is no such user the exception is being thrown.
+     * @param start_date date-format is YYYY-MM-DD.
+     * @param end_date date-format is YYYY-MM-DD.
+     * @return  a list of NoteDataSet. If note_name is empty, then list will consists of all notes for given user.
+     * @throws NoSuchUserException if given user id doesn't point to any user row in DB.
+     * @author Tesorp1X
+     */
     public List<NoteDataSet> getListOfNotes(long user_id, Date start_date, Date end_date) throws NoSuchUserException {
-
+//TODO: think about polymorphic solution.
         if (!verifyUserId(user_id)) {
             throw new NoSuchUserException();
         }
