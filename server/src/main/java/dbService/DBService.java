@@ -5,19 +5,27 @@ import accountService.UserAccount;
 import configurator.Configurator;
 import configurator.ConfiguratorException;
 import dbService.dataSets.*;
-import dbService.dao.*;
-
 
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import java.sql.Date;
+
 import java.util.List;
+
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Root;
 
 /**
  * Utility class to handle data base manipulations.
  * @author Tesorp1X
+ * @author KyMaKa
  */
 public class DBService {
 
@@ -61,8 +69,96 @@ public class DBService {
         return configuration;
     }
 
+    public void closeSessionFactory() {
+
+        try {
+            sessionFactory.getCurrentSession().getTransaction().commit();
+            sessionFactory.getCurrentSession().close();
+            System.out.println("All session are closed.");
+        } catch (HibernateException e) {
+            System.out.println("All session are closed.");
+        } finally {
+            sessionFactory.close();
+        }
+
+
+    }
 
     /*       User manipulation      */
+
+    private UserDataSet getUserById(long id) throws NoSuchUserException {
+
+        Session session = sessionFactory.openSession();
+        UserDataSet dataset = session.get(UserDataSet.class, id);
+        session.close();
+
+        if (dataset == null) {
+            throw new NoSuchUserException();
+        }
+
+        return dataset;
+    }
+
+    private boolean verifyUserId(long user_id) {
+
+        try {
+            UserDataSet user = getUserById(user_id);
+        } catch (NoSuchUserException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private UserDataSet getUserEntity(String field_name, String field_value) throws NoSuchUserException {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<UserDataSet> criteria = builder.createQuery(UserDataSet.class);
+
+        Root<UserDataSet> from = criteria.from(UserDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<UserDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+
+        try {
+
+            return typedQuery.getSingleResult();
+
+        } catch (NoResultException e) {
+
+            throw new NoSuchUserException(field_value);
+
+        }
+        finally {
+            session.close();
+        }
+
+    }
+
+
+    private List<UserDataSet> getListOfUsers_(int start_point, int max_result) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<UserDataSet> cq = cb.createQuery(UserDataSet.class);
+        Root<UserDataSet> rootEntry = cq.from(UserDataSet.class);
+        CriteriaQuery<UserDataSet> all = cq.select(rootEntry);
+
+        TypedQuery<UserDataSet> allQuery = session.createQuery(all);
+        if (max_result != -1) {
+            allQuery.setFirstResult(start_point).setMaxResults(max_result);
+        }
+
+        List<UserDataSet> resultList = allQuery.getResultList();
+        session.close();
+
+        return resultList;
+    }
 
 
     public long addUser(String username, String password) {
@@ -70,8 +166,7 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            UserDAO userDAO = new UserDAO(session);
-            long id = userDAO.addNewUser(username, password);
+            long id = (Long) session.save(new UserDataSet(username, password));
             transaction.commit();
             session.close();
 
@@ -89,8 +184,7 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            UserDAO userDAO = new UserDAO(session);
-            long id = userDAO.addNewUser(username, password, telegram);
+            long id = (Long) session.save(new UserDataSet(username, password, telegram));
             transaction.commit();
             session.close();
 
@@ -107,36 +201,32 @@ public class DBService {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-        UserDAO userDAO = new UserDAO(session);
-        UserDataSet user_to_delete = userDAO.getUserByUsername(username);
-
-        boolean is_deleted = userDAO.deleteUserById(user_to_delete.getId());
-        transaction.commit();
-        session.close();
-
-        if (!is_deleted) {
+        UserDataSet userToDelete = getUserEntity("username", username);
+        if (userToDelete == null) {
 
             throw new NoSuchUserException(username);
         }
+
+        session.delete(userToDelete);
         //TODO: LOG INFO ABOUT DELETION.
+        transaction.commit();
+        session.close();
     }
 
     public void deleteUserByTelegram(String telegram) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
-
-        UserDAO userDAO = new UserDAO(session);
-        UserDataSet user_to_delete = userDAO.getUserByTelegram(telegram);
-
-        boolean is_deleted = userDAO.deleteUserById(user_to_delete.getId());
-        transaction.commit();
-        session.close();
-        if (!is_deleted) {
+        UserDataSet userToDelete = getUserEntity("telegram", telegram);
+        if (userToDelete == null) {
 
             throw new NoSuchUserException(telegram);
         }
+
+        session.delete(userToDelete);
         //TODO: LOG INFO ABOUT DELETION.
+        transaction.commit();
+        session.close();
     }
 
     public void updateUser(String username, String new_password, String new_telegram) throws NoSuchUserException {
@@ -148,8 +238,7 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
 
-        UserDAO userDAO = new UserDAO(session);
-        userDAO.updateUser(user_to_update);
+        session.update(user_to_update);
 
         //TODO: LOG INFO ABOUT UPDATE.
         transaction.commit();
@@ -159,34 +248,20 @@ public class DBService {
 
     public List<UserDataSet> getListOfUsers() {
 
-        Session session = sessionFactory.openSession();
-
-        UserDAO userDAO = new UserDAO(session);
-        List<UserDataSet> result_list = userDAO.getListOfUsers();
-
-        session.close();
-
-        return  result_list;
+        return getListOfUsers_(-1, -1);
     }
 
     public List<UserDataSet> getListOfUsers(int start_point, int max_result) {
 
-        Session session = sessionFactory.openSession();
 
-        UserDAO userDAO = new UserDAO(session);
-        List<UserDataSet> result_list = userDAO.getListOfUsers(start_point, max_result);
-
-        session.close();
-
-        return  result_list;
+        return getListOfUsers_(start_point, max_result);
     }
 
     public UserDataSet findUserByUsername(String username) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
-        UserDAO userDAO = new UserDAO(session);
 
-        UserDataSet dataSet = userDAO.getUserByUsername(username);
+        UserDataSet dataSet = getUserEntity("username", username);
 
         session.close();
 
@@ -200,9 +275,8 @@ public class DBService {
     public UserDataSet findUserByTelegram(String telegram) throws NoSuchUserException {
 
         Session session = sessionFactory.openSession();
-        UserDAO userDAO = new UserDAO(session);
 
-        UserDataSet dataSet = userDAO.getUserByTelegram(telegram);
+        UserDataSet dataSet = getUserEntity("telegram", telegram);
 
         session.close();
 
@@ -230,7 +304,173 @@ public class DBService {
 
     //Note manipulation
 
+    private NoteDataSet getNoteEntity(String field_name, String field_value) {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> criteria = builder.createQuery(NoteDataSet.class);
+
+        Root<NoteDataSet> from = criteria.from(NoteDataSet.class);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
+
+        TypedQuery<NoteDataSet> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+
+        NoteDataSet result = typedQuery.getSingleResult();
+        session.close();
+
+        return result;
+    }
+
+    //TODO: JavaDoc and comments!
+
+    public long addNote(String name, String description, int value, long user_id) {
+        try {
+            Session session = sessionFactory.openSession();
+            Transaction transaction = session.beginTransaction();
+            //TODO: generate date and test it.
+            /*
+            * System.currentTimeMillis()
+            * long now = java.time.Instant.now().toEpochMilli();
+            */
+
+            long id = (Long) session.save(
+                    new NoteDataSet(name, value,
+                            new Date(System.currentTimeMillis()), description, user_id));
+            transaction.commit();
+            session.close();
 
 
+
+            return id;
+
+        } catch (HibernateException e) {
+
+            return -1;
+        }
+    }
+
+
+    public NoteDataSet getNoteById(long note_id) throws NoSuchNoteException {
+
+        Session session = sessionFactory.openSession();
+        NoteDataSet noteDS = session.get(NoteDataSet.class, note_id);
+        
+        session.close();
+
+        if (noteDS == null) {
+            throw new NoSuchNoteException("id " + note_id);
+        }
+
+        return noteDS;
+
+    }
+
+    //TODO: think about calling getNoteById method.
+    public void changeNote(long note_id, String new_name, String new_description, int new_value) throws NoSuchNoteException {
+
+        NoteDataSet note_to_update = getNoteById(note_id); //Is this good implementation?
+        note_to_update.setName(new_name);
+        note_to_update.setDescription(new_description);
+        note_to_update.setValue(new_value);
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
+        session.update(note_to_update);
+
+        transaction.commit();
+        session.close();
+    }
+
+    public boolean deleteNoteById(long note_id) {
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+
+        NoteDataSet note = session.get(NoteDataSet.class, note_id);
+
+        if (note != null) {
+            session.delete(note);
+            transaction.commit();
+            session.close();
+            return true;
+        }
+
+        transaction.commit();
+        session.close();
+        return false;
+    }
+
+    /**
+     * @param user_id user id in DB. If there is no such user the exception is being thrown.
+     * @param note_name if it is not empty, then list will consists of all notes with that name.
+     * @return  a list of NoteDataSet. If note_name is empty, then list will consists of all notes for given user.
+     * @throws NoSuchUserException if given user id doesn't point to any user row in DB.
+     * @author Tesorp1X
+     */
+    public List<NoteDataSet> getListOfNotes(long user_id, String note_name) throws NoSuchUserException {
+
+        if (!verifyUserId(user_id)) {
+            throw new NoSuchUserException();
+        }
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> cq = cb.createQuery(NoteDataSet.class);
+        Root<NoteDataSet> rootEntry = cq.from(NoteDataSet.class);
+        CriteriaQuery<NoteDataSet> userNotesCriteria;
+
+        if (note_name == null) {
+            userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id));
+        } else {
+            userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id),
+                                         cb.equal(rootEntry.get("name"), note_name));
+        }
+
+        List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
+
+        session.close();
+
+        return resultList;
+    }
+
+    /**
+     * @param user_id user id in DB. If there is no such user the exception is being thrown.
+     * @param start_date date-format is YYYY-MM-DD.
+     * @param end_date date-format is YYYY-MM-DD.
+     * @return  a list of NoteDataSet. If note_name is empty, then list will consists of all notes for given user.
+     * @throws NoSuchUserException if given user id doesn't point to any user row in DB.
+     * @author Tesorp1X
+     */
+    public List<NoteDataSet> getListOfNotes(long user_id, Date start_date, Date end_date) throws NoSuchUserException {
+//TODO: think about polymorphic solution.
+        if (!verifyUserId(user_id)) {
+            throw new NoSuchUserException();
+        }
+
+        if (end_date.compareTo(start_date) < 0) {
+            throw new IllegalArgumentException();
+        }
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<NoteDataSet> cq = cb.createQuery(NoteDataSet.class);
+        Root<NoteDataSet> rootEntry = cq.from(NoteDataSet.class);
+        CriteriaQuery<NoteDataSet> userNotesCriteria;
+
+        userNotesCriteria = cq.where(cb.equal(rootEntry.get("user_id"), user_id),
+                cb.between(rootEntry.get("date"), start_date, end_date));
+
+        List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
+
+        session.close();
+
+        return resultList;
+    }
 
 }

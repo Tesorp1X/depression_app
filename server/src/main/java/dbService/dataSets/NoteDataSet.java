@@ -2,7 +2,7 @@ package dbService.dataSets;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Date;
 
 
 @Entity
@@ -21,7 +21,7 @@ public class NoteDataSet implements Serializable {
     private String name;
 
     @Column(name = "date", nullable = false)
-    private java.util.Date date;
+    private Date date;
 
     @Column(name = "value", nullable = false)
     private int value;
@@ -35,11 +35,13 @@ public class NoteDataSet implements Serializable {
 
     protected NoteDataSet() { }
 
-    public NoteDataSet(String name, int value, java.util.Date date, String description, long user_id) {
+    public NoteDataSet(String name, int value, Date date, String description, long user_id) {
+        this.user_id = user_id;
         this.name = name;
         this.value = value;
         this.date = date;
         this.description = description;
+        this.user_id = user_id;
     }
 
     public void setName(String name) {

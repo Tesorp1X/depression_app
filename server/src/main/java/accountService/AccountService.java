@@ -155,7 +155,7 @@ public class AccountService {
             throw new InvalidUsernameException(username);
         }
 
-        return  dbService.getUserAccountByTelegram(telegram);
+        return dbService.getUserAccountByTelegram(telegram);
     }
 
     /**

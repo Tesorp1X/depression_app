@@ -2,12 +2,9 @@ package main;
 
 import accountService.AccountService;
 import dbService.DBService;
-import servlets.ServletDeleteUser;
-import servlets.ServletGetListOfUsers;
-import servlets.ServletGetUser;
-import servlets.ServletLogin;
-import servlets.ServletRegister;
-import servlets.ServletUpdateUser;
+import noteService.NoteService;
+import parser.ConsoleParser;
+import servlets.*;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -21,8 +18,11 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         //Services
-        AccountService accountService = new AccountService(new DBService());
-        //AccountService accountService = new AccountService(dbService);
+        DBService dbService = new DBService();
+        //AccountService accountService = new AccountService(new DBService());
+        AccountService accountService = new AccountService(dbService);
+        //NoteService noteService = new NoteService(new DBService());
+        NoteService noteService = new NoteService(dbService);
 
         //Servlets
         /* !!! Put accountService into users servlets. !!!  */
@@ -35,6 +35,14 @@ public class Main {
         ServletGetListOfUsers sGetListOfUsers = new ServletGetListOfUsers(accountService);
         ServletLogin sLogin = new ServletLogin(accountService);
 
+        //Note Servlets
+        /* !!! Put NoteService into notes servlets. !!!  */
+        ServletGetListOfNotes sGetListOfNotes = new ServletGetListOfNotes(noteService);
+        ServletAddNote sAddNote = new ServletAddNote(noteService);
+        ServletChangeNote sChangeNote = new ServletChangeNote(noteService);
+        ServletDeleteNote sDeleteNote = new ServletDeleteNote(noteService);
+        ServletGetNote sGetNote = new ServletGetNote(noteService);
+        ServletGetReport sGetReport = new ServletGetReport(noteService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -44,16 +52,29 @@ public class Main {
         context.addServlet(new ServletHolder(sDeleteUser), "/DeleteUser");
         context.addServlet(new ServletHolder(sUpdateUser), "/UpdateUser");
         context.addServlet(new ServletHolder(sGetListOfUsers), "/GetListOfUsers");
+
         context.addServlet(new ServletHolder(sLogin), "/Login");
+
+        context.addServlet(new ServletHolder(sGetListOfNotes), "/GetListOfNotes");
+        context.addServlet(new ServletHolder(sAddNote), "/AddNote");
+        context.addServlet(new ServletHolder(sChangeNote), "/ChangeNote");
+        context.addServlet(new ServletHolder(sDeleteNote), "/DeleteNote");
+        context.addServlet(new ServletHolder(sGetNote), "/GetNote");
+        context.addServlet(new ServletHolder(sGetReport), "/GetReport");
+
 
         //Server itself
         Server server = new Server(8080);
         server.setHandler(context);
 
+        //TODO: parser new implementation.
+        ConsoleParser parser = new ConsoleParser(args, dbService, server);
+        parser.listenCMD();
 
-        //TODO: Handle exceptions.
-        server.start();
-        server.join();
+        //Debug only
+        /*server.start();
+        server.join();*/
+
 
     }
 }
