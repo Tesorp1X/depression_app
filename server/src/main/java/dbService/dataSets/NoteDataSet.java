@@ -36,7 +36,6 @@ public class NoteDataSet implements Serializable {
     protected NoteDataSet() { }
 
     public NoteDataSet(String name, int value, Date date, String description, long user_id) {
-        this.user_id = user_id;
         this.name = name;
         this.value = value;
         this.date = date;

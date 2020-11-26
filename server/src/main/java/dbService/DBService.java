@@ -447,7 +447,7 @@ public class DBService {
      * @author Tesorp1X
      */
     public List<NoteDataSet> getListOfNotes(long user_id, Date start_date, Date end_date) throws NoSuchUserException {
-//TODO: think about polymorphic solution.
+    //TODO: think about polymorphic solution.
         if (!verifyUserId(user_id)) {
             throw new NoSuchUserException();
         }
@@ -468,6 +468,40 @@ public class DBService {
 
         List<NoteDataSet> resultList = session.createQuery(userNotesCriteria).getResultList();
 
+        session.close();
+
+        return resultList;
+    }
+
+    public List<AdminDataSet> getListOfAdmins() {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<AdminDataSet> cq = cb.createQuery(AdminDataSet.class);
+        Root<AdminDataSet> rootEntry = cq.from(AdminDataSet.class);
+        CriteriaQuery<AdminDataSet> all = cq.select(rootEntry);
+
+        TypedQuery<AdminDataSet> allQuery = session.createQuery(all);
+
+        List<AdminDataSet> resultList = allQuery.getResultList();
+        session.close();
+
+        return resultList;
+    }
+
+    public List<TesterDataSet> getListOfTesters() {
+
+        Session session = sessionFactory.openSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<TesterDataSet> cq = cb.createQuery(TesterDataSet.class);
+        Root<TesterDataSet> rootEntry = cq.from(TesterDataSet.class);
+        CriteriaQuery<TesterDataSet> all = cq.select(rootEntry);
+
+        TypedQuery<TesterDataSet> allQuery = session.createQuery(all);
+
+        List<TesterDataSet> resultList = allQuery.getResultList();
         session.close();
 
         return resultList;

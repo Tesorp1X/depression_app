@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'app.depression'
-version '0.6.1-TEST_VERSION'
+version '0.6.2-TEST_VERSION'
 
 task fatJar(type: Jar) {
     manifest {
