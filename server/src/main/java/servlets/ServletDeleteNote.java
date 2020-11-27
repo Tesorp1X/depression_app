@@ -54,7 +54,7 @@ public class ServletDeleteNote extends HttpServlet {
             deleted = noteService.deleteNote(note_id);
         }
 
-        if (notes.size() == 1) {
+        if (notes != null && notes.size() == 1) {
             note_id = notes.get(0).getNote_id();
             deleted = noteService.deleteNote(note_id);
         }
@@ -63,12 +63,15 @@ public class ServletDeleteNote extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("Note with id: " + note_id + " deleted!");
         } else {
-            if (response.getStatus() == HttpServletResponse.SC_OK) {
+            if (notes != null && response.getStatus() == HttpServletResponse.SC_OK) {
                 PrintWriter writer = response.getWriter();
                 for (var note : notes) {
                     writer.println(note.toString());
                 }
                 writer.close();
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print("ERROR: No such note.");
             }
         }
     }

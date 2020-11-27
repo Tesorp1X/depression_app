@@ -13,21 +13,23 @@ import noteService.NoteService;
  * URL: /AddNote
  */
 public class ServletAddNote extends HttpServlet {
-    private NoteService noteService;
+    private final NoteService noteService;
 
     public ServletAddNote(NoteService noteService) {
         this.noteService = noteService;
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        //TODO: add is_bot parameter and if true put in response id of new note.
         response.setContentType("text/plain;charset=utf-8");
 
-        String name;
-        String description; 
         int value;
         long user_id;
-        
+        boolean is_bot = Boolean.parseBoolean(request.getParameter("is_bot"));
+        String name;
+        String description;
+
+
         name = request.getParameter("name");
         name = (name != null) ? name.replace("\"", "") : null;
         description = request.getParameter("description");
@@ -41,7 +43,11 @@ public class ServletAddNote extends HttpServlet {
             response.getWriter().println("Can't add new note.");
         } else {
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("New note successfully added!");
+            if (is_bot) {
+                response.getWriter().print(status);
+            } else {
+                response.getWriter().println("New note successfully added!");
+            }
         }
     }
     
