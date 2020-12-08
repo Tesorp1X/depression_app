@@ -22,8 +22,7 @@ public class TesterDataSet implements Serializable {
 
     public TesterDataSet() {}
 
-    public TesterDataSet(long id, String telegram_id, long user_id) {
-        this.id = id;
+    public TesterDataSet(String telegram_id, long user_id) {
         this.telegram_id = telegram_id;
         this.user_id = user_id;
     }

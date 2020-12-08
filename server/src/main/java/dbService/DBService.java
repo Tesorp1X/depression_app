@@ -52,8 +52,11 @@ public class DBService {
     private Configuration getMySqlConfiguration() throws ConfiguratorException {
 
         Configuration configuration = new Configuration();
+        //DataSets that's being used.
         configuration.addAnnotatedClass(UserDataSet.class);
         configuration.addAnnotatedClass(NoteDataSet.class);
+        configuration.addAnnotatedClass(AdminDataSet.class);
+        configuration.addAnnotatedClass(TesterDataSet.class);
 
         Configurator configurator = new Configurator("mysql.conf");
 
@@ -330,11 +333,6 @@ public class DBService {
         try {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
-            //TODO: generate date and test it.
-            /*
-            * System.currentTimeMillis()
-            * long now = java.time.Instant.now().toEpochMilli();
-            */
 
             long id = (Long) session.save(
                     new NoteDataSet(name, value,
@@ -447,7 +445,7 @@ public class DBService {
      * @author Tesorp1X
      */
     public List<NoteDataSet> getListOfNotes(long user_id, Date start_date, Date end_date) throws NoSuchUserException {
-    //TODO: think about polymorphic solution.
+    //TODO: think about polymorphic solution. @see getListOfEntities .
         if (!verifyUserId(user_id)) {
             throw new NoSuchUserException();
         }
@@ -473,38 +471,117 @@ public class DBService {
         return resultList;
     }
 
-    public List<AdminDataSet> getListOfAdmins() {
+    /**
+     * For util info only (at least yet)!
+     * @param clazz AdminDataSet or TesterDataSet types.
+     * @return List of given type - all entities associated with given type in DB.
+     */
+    public <T> List<T> getListOfEntities(Class<T> clazz) {
 
         Session session = sessionFactory.openSession();
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<AdminDataSet> cq = cb.createQuery(AdminDataSet.class);
-        Root<AdminDataSet> rootEntry = cq.from(AdminDataSet.class);
-        CriteriaQuery<AdminDataSet> all = cq.select(rootEntry);
+        CriteriaQuery<T> cq = cb.createQuery(clazz);
+        Root<T> rootEntry = cq.from(clazz);
+        CriteriaQuery<T> all = cq.select(rootEntry);
 
-        TypedQuery<AdminDataSet> allQuery = session.createQuery(all);
+        TypedQuery<T> allQuery = session.createQuery(all);
 
-        List<AdminDataSet> resultList = allQuery.getResultList();
+        List<T> resultList = allQuery.getResultList();
         session.close();
 
         return resultList;
     }
 
-    public List<TesterDataSet> getListOfTesters() {
+    /**
+     * Test and util info purposes only!
+     * Polymorphic way of getting entities from db. Test and extend to replace getUserEntity and getNoteEntity.
+     * @param clazz AdminDataSet or TesterDataSet types.
+     * @param field_name name of the field that is being used to find the entity.
+     * @param field_value value of that field.
+     */
+    private <T> T getEntity(Class<T> clazz, String field_name, String field_value) throws NoResultException {
 
         Session session = sessionFactory.openSession();
 
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<TesterDataSet> cq = cb.createQuery(TesterDataSet.class);
-        Root<TesterDataSet> rootEntry = cq.from(TesterDataSet.class);
-        CriteriaQuery<TesterDataSet> all = cq.select(rootEntry);
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<T> criteria = builder.createQuery(clazz);
 
-        TypedQuery<TesterDataSet> allQuery = session.createQuery(all);
+        Root<T> from = criteria.from(clazz);
+        ParameterExpression<String> nameParam = builder.parameter(String.class);
+        criteria.select(from).where(builder.equal(from.get(field_name), nameParam));
 
-        List<TesterDataSet> resultList = allQuery.getResultList();
+        TypedQuery<T> typedQuery = session.createQuery(criteria);
+        typedQuery.setParameter(nameParam, field_value);
+
+        try {
+            return typedQuery.getSingleResult();
+
+        } catch (NoResultException e) {
+            //TODO: handle exception in a better way (: .
+            throw e;
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    /**
+     * Test and util info purposes only!
+     * @param clazz AdminDataSet or TesterDataSet types.
+     * @param field_name name of the field that is being used to find the entity.
+     * @param field_value value of that field.
+     * @return List of given type - all entities associated with given type in DB.
+     */
+    public <T> List<T> removeEntity(Class<T> clazz, String field_name, String field_value) {
+
+        T dataSet = getEntity(clazz, field_name, field_value);
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.delete(dataSet);
+        transaction.commit();
         session.close();
 
-        return resultList;
+        return getListOfEntities(clazz);
+    }
+
+    /**
+     * Test and util info purposes only!
+     * Used to add admin by its telegram_id. User must be authorized (be in users table).
+     * @throws NoSuchUserException being thrown if given telegram_id is not authorized.
+     * @return List of all Admins.
+     */
+    public List<AdminDataSet> addAdmin(String telegram_id) throws NoSuchUserException {
+
+        long user_id = getUserAccountByTelegram(telegram_id).getUser_id();
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.save(new AdminDataSet(telegram_id, user_id));
+        transaction.commit();
+        session.close();
+
+        return getListOfEntities(AdminDataSet.class);
+    }
+
+    /**
+     * Test and util info purposes only!
+     * Used to add admin by its telegram_id. User must be authorized (be in users table).
+     * @throws NoSuchUserException being thrown if given telegram_id is not authorized.
+     * @return List of all Testers.
+     */
+    public List<TesterDataSet> addTester(String telegram_id) throws NoSuchUserException {
+
+        long user_id = getUserAccountByTelegram(telegram_id).getUser_id();
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        session.save(new TesterDataSet(telegram_id, user_id));
+        transaction.commit();
+        session.close();
+
+        return getListOfEntities(TesterDataSet.class);
     }
 
 }
