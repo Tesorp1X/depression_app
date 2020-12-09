@@ -110,10 +110,9 @@ public class NoteService {
     /**
      * Use to convert pair of start_date and end_date strings into Pair of Date and Date format.
      * @return Pair of Dates object.
-     * @see Pair .
+     * @see Pair
      * @author Tesorp1X
      */
-
     private Pair<Date, Date> convertStringToDate(String start_date, String end_date) {
 
         /*  Changing format from dd-MM-yyyy to yyyy-MM-dd.
@@ -122,10 +121,41 @@ public class NoteService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             System.out.println(LocalDate.parse(startDateString, formatter).format(formatter2));
-        * */
+        */
         try {
-            Date db_date_start = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(start_date)).getTime());
-            Date db_date_end = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(end_date)).getTime());
+            assert (start_date != null && end_date != null);
+            start_date = start_date.replace('.', '-');
+            end_date = end_date.replace('.', '-');
+
+            Date db_date_start;
+            Date db_date_end;
+
+            //finding the right format.
+            if (start_date.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
+
+                db_date_start = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(start_date)).getTime());
+
+            } else if (start_date.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
+
+                db_date_start = new Date((new SimpleDateFormat("dd-MM-yyyy").parse(start_date)).getTime());
+
+            } else {
+
+                throw new IllegalArgumentException();
+            }
+
+            if (end_date.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
+
+                db_date_end = new Date((new SimpleDateFormat("yyyy-MM-dd").parse(end_date)).getTime());
+
+            } else if (end_date.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
+
+                db_date_end = new Date((new SimpleDateFormat("dd-MM-yyyy").parse(start_date)).getTime());
+
+            } else {
+
+                throw new IllegalArgumentException();
+            }
 
             return new Pair<>(db_date_start, db_date_end);
 

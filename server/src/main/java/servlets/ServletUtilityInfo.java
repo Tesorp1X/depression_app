@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,12 +43,11 @@ public class ServletUtilityInfo extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        List<?> list = null;
+        List<?> list = Collections.emptyList();
+
 
         switch (action) {
             case "getList":
-
-
                 if (whom.equals("admins")) {
 
                      list = dbService.getListOfEntities(AdminDataSet.class);
@@ -128,17 +128,17 @@ public class ServletUtilityInfo extends HttpServlet {
                 break;
         }
         //TODO: implement rmAll option
-        if (list != null) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json_sting = objectMapper.writeValueAsString(list);
 
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json;charset=utf-8");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json_string = objectMapper.writeValueAsString(list);
 
-            PrintWriter out = response.getWriter();
-            out.print(json_sting);
-            out.flush();
-        }
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json;charset=utf-8");
+
+        PrintWriter out = response.getWriter();
+        out.print(json_string);
+        out.flush();
+
 
     }
 }
