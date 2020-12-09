@@ -16,7 +16,7 @@ import noteService.NoteService;
  */
 public class ServletChangeNote extends HttpServlet {
 
-    private NoteService noteService;
+    private final NoteService noteService;
 
     public ServletChangeNote(NoteService noteService) {
         this.noteService = noteService;
