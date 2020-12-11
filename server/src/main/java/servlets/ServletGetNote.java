@@ -2,10 +2,14 @@ package servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dbService.NoSuchNoteException;
 import dbService.NoSuchUserException;
@@ -31,8 +35,9 @@ public class ServletGetNote extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        response.setContentType("text/plain;charset=utf-8");
+        response.setContentType("application/json;charset=utf-8");
 
+        Map<String, Object> getNoteMap = new HashMap<>();
         String name;
         long user_id;
         long note_id;
@@ -47,36 +52,40 @@ public class ServletGetNote extends HttpServlet {
             try {
                 note = noteService.getNoteById(note_id);
                 response.setStatus(HttpServletResponse.SC_OK);
+                getNoteMap.put("ERROR_STATUS", "OK");
 			} catch (NoSuchNoteException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println("Can't find note. " + e.getMessage());
+				getNoteMap.put("ERROR_STATUS", "Can't find note. " + e.getMessage());
 			}
         } else {
             user_id = Long.getLong(request.getParameter("user_id"));
             try {
                 notes = noteService.getAllUserNotes(user_id, name);
                 response.setStatus(HttpServletResponse.SC_OK);
+                getNoteMap.put("ERROR_STATUS", "OK");
 			} catch (NoSuchUserException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println("Can't get note: " + e.getMessage());
+				getNoteMap.put("ERROR_STATUS", "Can't get note: " + e.getMessage());
 			}
         }
 
 
         if (response.getStatus() == HttpServletResponse.SC_OK && notes == null) {
             assert note != null;
-            response.getWriter().println(note.toString());
+            getNoteMap.put("note", note.toString());
         } else {
             if (notes != null) {
-                PrintWriter writer = response.getWriter();
-                for (var tmp : notes) {
-                    writer.println(tmp.toString());
-                }
-                writer.close();
+                getNoteMap.put("notes", notes);
             } else {
-                response.getWriter().println("Can't find note with such parameters");
+                getNoteMap.put("ERROR_STATUS", "Can't find note with such parameters");
             }
         }
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(getNoteMap);
+
+        PrintWriter writer = response.getWriter();
+        writer.print(json);
     }
     
 }

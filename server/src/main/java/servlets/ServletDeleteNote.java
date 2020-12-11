@@ -1,11 +1,16 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.PrintWriter;
 
 import noteService.Note;
@@ -28,8 +33,9 @@ public class ServletDeleteNote extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        response.setContentType("text/plain;charset=utf-8");
+        response.setContentType("application/json;charset=utf-8");
 
+        Map<String, Object> deleteMap = new HashMap<>();
         long note_id = -1;
         long user_id;
         String name;
@@ -45,32 +51,39 @@ public class ServletDeleteNote extends HttpServlet {
             try {
                 notes = noteService.getAllUserNotes(user_id, name);
                 response.setStatus(HttpServletResponse.SC_OK);
+                deleteMap.put("ERROR_STATUS", "OK");
 			} catch (NoSuchUserException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println("Can't delete note: " + e.getMessage());
+				deleteMap.put("ERROR_STATUS", "Can't delete note: " + e.getMessage());
 			}
         } else {
             note_id = Long.parseLong(request.getParameter("note_id"));
             deleted = noteService.deleteNote(note_id);
         }
 
-        if (notes.size() == 1) {
+        if (notes != null && notes.size() == 1) {
             note_id = notes.get(0).getNote_id();
             deleted = noteService.deleteNote(note_id);
         }
 
         if (deleted) {
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("Note with id: " + note_id + " deleted!");
+            deleteMap.put("ERROR_STATUS", "OK");
         } else {
-            if (response.getStatus() == HttpServletResponse.SC_OK) {
-                PrintWriter writer = response.getWriter();
-                for (var note : notes) {
-                    writer.println(note.toString());
-                }
-                writer.close();
+            if (notes != null && response.getStatus() == HttpServletResponse.SC_OK) {
+                deleteMap.put("notes", notes);
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                deleteMap.put("ERROR_STATUS", "No such note.");
             }
         }
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(deleteMap);
+
+        PrintWriter writer = response.getWriter();
+        writer.print(json);
+        writer.flush();
     }
     
 }

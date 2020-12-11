@@ -36,13 +36,16 @@ public class Main {
         ServletLogin sLogin = new ServletLogin(accountService);
 
         //Note Servlets
-        /* !!! Put NoteService into notes servlets. !!!  */
+        /* !!! Put noteService into notes servlets. !!!  */
         ServletGetListOfNotes sGetListOfNotes = new ServletGetListOfNotes(noteService);
         ServletAddNote sAddNote = new ServletAddNote(noteService);
         ServletChangeNote sChangeNote = new ServletChangeNote(noteService);
         ServletDeleteNote sDeleteNote = new ServletDeleteNote(noteService);
         ServletGetNote sGetNote = new ServletGetNote(noteService);
         ServletGetReport sGetReport = new ServletGetReport(noteService);
+
+        //Util-Info servlet
+        ServletUtilityInfo sUtilityInfo = new ServletUtilityInfo(dbService);
 
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -62,18 +65,20 @@ public class Main {
         context.addServlet(new ServletHolder(sGetNote), "/GetNote");
         context.addServlet(new ServletHolder(sGetReport), "/GetReport");
 
+        context.addServlet(new ServletHolder(sUtilityInfo), "/info");
+
 
         //Server itself
         Server server = new Server(8080);
         server.setHandler(context);
 
         //TODO: parser new implementation.
-        ConsoleParser parser = new ConsoleParser(args, dbService, server);
-        parser.listenCMD();
+        /*ConsoleParser parser = new ConsoleParser(args, dbService, server);
+        parser.listenCMD();*/
 
-        //Debug only
-        /*server.start();
-        server.join();*/
+        //TODO: Debug only
+        server.start();
+        server.join();
 
 
     }

@@ -38,7 +38,7 @@ public class AccountService {
 
         return username != null
                 && password != null
-                && username.matches("[0-9a-zA-Z]+")
+                && username.matches("[0-9a-zA-Z_-]+")
                 && password.matches("[0-9a-zA-Z]+");
     }
 
@@ -46,11 +46,10 @@ public class AccountService {
      * Verifies if given username are valid.
      *
      * @param username Valid username should consist of 0-9, a-z and A-Z.
-     *
      */
     private boolean verifyUsername(String username) {
 
-        return username != null && username.matches("[0-9a-zA-Z]+");
+        return username != null && username.matches("[0-9a-zA-Z_-]+");
     }
 
     /**
@@ -209,7 +208,6 @@ public class AccountService {
      * @throws InvalidUsernameException being thrown when username is invalid.
      */
     public void deleteUserByUsername(String username) throws NoSuchUserException, InvalidUsernameException {
-
 
         if (!verifyUsername(username)) {
 
